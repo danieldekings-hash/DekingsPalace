@@ -4,8 +4,11 @@
   background: rgba($bg-dark, 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba($primary-color, 0.1);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: $z-index-sticky;
   transition: all 0.3s ease;
 
