@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import { DollarSign, UserPlus, ClipboardList, CreditCard, TrendingUp, Lock, Zap, Smartphone, Target, Shield, MessageSquare } from 'lucide-react';
 import './landing.scss';
 
 export default function HomePage() {
@@ -15,7 +16,7 @@ export default function HomePage() {
             <div className="row align-items-center min-vh-100 py-5">
               <div className="col-lg-6 col-12 mb-5 mb-lg-0">
                 <div className="hero-badge mb-4">
-                  <span className="badge-icon">💰</span>
+                  <span className="badge-icon"><DollarSign size={20} /></span>
                   <span>Earn Above 10% Monthly Returns — Safely!</span>
                 </div>
                 <h1 className="hero-title mb-4">
@@ -35,19 +36,19 @@ export default function HomePage() {
                 </div>
                 <div className="hero-stats mt-5">
                   <div className="row g-4">
-                    <div className="col-4">
+                    <div className="col-12 col-sm-4">
                       <div className="stat-item">
                         <h3 className="stat-value">$2.5M+</h3>
                         <p className="stat-label">Total Invested</p>
                       </div>
                     </div>
-                    <div className="col-4">
+                    <div className="col-12 col-sm-4">
                       <div className="stat-item">
                         <h3 className="stat-value">5,000+</h3>
                         <p className="stat-label">Active Users</p>
                       </div>
                     </div>
-                    <div className="col-4">
+                    <div className="col-12 col-sm-4">
                       <div className="stat-item">
                         <h3 className="stat-value">98%</h3>
                         <p className="stat-label">Satisfaction</p>
@@ -83,7 +84,7 @@ export default function HomePage() {
               <div className="col-md-6 col-lg-3">
                 <div className="step-card">
                   <div className="step-icon">
-                    <span>👤</span>
+                    <UserPlus size={48} />
                   </div>
                   <h4 className="step-title">Create Your Account</h4>
                   <p className="step-description">
@@ -97,7 +98,7 @@ export default function HomePage() {
               <div className="col-md-6 col-lg-3">
                 <div className="step-card">
                   <div className="step-icon">
-                    <span>📋</span>
+                    <ClipboardList size={48} />
                   </div>
                   <h4 className="step-title">Pick the Right Plan</h4>
                   <p className="step-description">
@@ -111,7 +112,7 @@ export default function HomePage() {
               <div className="col-md-6 col-lg-3">
                 <div className="step-card">
                   <div className="step-icon">
-                    <span>💳</span>
+                    <CreditCard size={48} />
                   </div>
                   <h4 className="step-title">Invest Securely</h4>
                   <p className="step-description">
@@ -125,7 +126,7 @@ export default function HomePage() {
               <div className="col-md-6 col-lg-3">
                 <div className="step-card">
                   <div className="step-icon">
-                    <span>📊</span>
+                    <TrendingUp size={48} />
                   </div>
                   <h4 className="step-title">Watch Your Wealth Grow</h4>
                   <p className="step-description">
@@ -148,7 +149,7 @@ export default function HomePage() {
                 <div className="growth-visual">
                   <div className="growth-chart">
                     <div className="chart-illustration">
-                      <span className="chart-icon">📊</span>
+                      <span className="chart-icon"><TrendingUp size={64} /></span>
                       <div className="chart-bars">
                         <div className="bar bar-1"></div>
                         <div className="bar bar-2"></div>
@@ -203,7 +204,7 @@ export default function HomePage() {
               <div className="col-md-6 col-lg-4">
                 <div className="feature-card">
                   <div className="feature-card-icon">
-                    <span>🔒</span>
+                    <Lock size={48} />
                   </div>
                   <h4 className="feature-card-title">Ironclad Security</h4>
                   <p className="feature-card-text">
@@ -214,7 +215,7 @@ export default function HomePage() {
               <div className="col-md-6 col-lg-4">
                 <div className="feature-card">
                   <div className="feature-card-icon">
-                    <span>📈</span>
+                    <TrendingUp size={48} />
                   </div>
                   <h4 className="feature-card-title">Guaranteed Returns</h4>
                   <p className="feature-card-text">
@@ -225,7 +226,7 @@ export default function HomePage() {
               <div className="col-md-6 col-lg-4">
                 <div className="feature-card">
                   <div className="feature-card-icon">
-                    <span>⚡</span>
+                    <Zap size={48} />
                   </div>
                   <h4 className="feature-card-title">Instant Withdrawals</h4>
                   <p className="feature-card-text">
@@ -236,7 +237,7 @@ export default function HomePage() {
               <div className="col-md-6 col-lg-4">
                 <div className="feature-card">
                   <div className="feature-card-icon">
-                    <span>📱</span>
+                    <Smartphone size={48} />
                   </div>
                   <h4 className="feature-card-title">24/7 Transparency</h4>
                   <p className="feature-card-text">
@@ -247,7 +248,7 @@ export default function HomePage() {
               <div className="col-md-6 col-lg-4">
                 <div className="feature-card">
                   <div className="feature-card-icon">
-                    <span>🎯</span>
+                    <Target size={48} />
                   </div>
                   <h4 className="feature-card-title">Precision Investment</h4>
                   <p className="feature-card-text">
@@ -258,7 +259,7 @@ export default function HomePage() {
               <div className="col-md-6 col-lg-4">
                 <div className="feature-card">
                   <div className="feature-card-icon">
-                    <span>🛡️</span>
+                    <Shield size={48} />
                   </div>
                   <h4 className="feature-card-title">Insurance Protected</h4>
                   <p className="feature-card-text">
@@ -279,7 +280,7 @@ export default function HomePage() {
             <div className="row g-4">
               <div className="col-lg-6">
                 <div className="testimonial-card">
-                  <div className="testimonial-icon">💬</div>
+                  <div className="testimonial-icon"><MessageSquare size={32} /></div>
                   <p className="testimonial-text">
                     "DeKingsPalace transformed my financial life. I started with $500 and now manage 
                     a portfolio worth over $50,000. The returns are consistent, and withdrawals are instant!"
@@ -295,7 +296,7 @@ export default function HomePage() {
               </div>
               <div className="col-lg-6">
                 <div className="testimonial-card">
-                  <div className="testimonial-icon">💬</div>
+                  <div className="testimonial-icon"><MessageSquare size={32} /></div>
                   <p className="testimonial-text">
                     "The referral program is a game-changer. I earn passive income every month just by 
                     sharing my success story. The platform is secure, transparent, and incredibly user-friendly."

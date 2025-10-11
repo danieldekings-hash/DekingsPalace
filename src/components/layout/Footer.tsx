@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Crown, Facebook, Twitter, Instagram, Linkedin, Lock, CheckCircle, Shield } from 'lucide-react';
 import './Footer.scss';
 
 export default function Footer() {
@@ -11,7 +12,7 @@ export default function Footer() {
           <div className="row g-4">
             <div className="col-lg-4 col-md-6">
               <div className="footer-brand mb-4">
-                <span className="brand-icon">👑</span>
+                <span className="brand-icon"><Crown size={32} /></span>
                 <span className="brand-text">DeKingsPalace</span>
               </div>
               <p className="footer-description">
@@ -20,16 +21,16 @@ export default function Footer() {
               </p>
               <div className="social-links mt-4">
                 <a href="#" className="social-link" aria-label="Facebook">
-                  <span>📘</span>
+                  <Facebook size={20} />
                 </a>
                 <a href="#" className="social-link" aria-label="Twitter">
-                  <span>🐦</span>
+                  <Twitter size={20} />
                 </a>
                 <a href="#" className="social-link" aria-label="Instagram">
-                  <span>📷</span>
+                  <Instagram size={20} />
                 </a>
                 <a href="#" className="social-link" aria-label="LinkedIn">
-                  <span>💼</span>
+                  <Linkedin size={20} />
                 </a>
               </div>
             </div>
@@ -81,7 +82,7 @@ export default function Footer() {
                     aria-label="Email"
                     required
                   />
-                  <button type="submit" className="btn btn-gold">
+                  <button type="submit" className="btn btn-gold flex-shrink-0">
                     Subscribe
                   </button>
                 </div>
@@ -100,9 +101,9 @@ export default function Footer() {
             </div>
             <div className="col-md-6 text-center text-md-end">
               <div className="footer-badges">
-                <span className="badge-item">🔒 Secure</span>
-                <span className="badge-item">✓ Verified</span>
-                <span className="badge-item">🛡️ Insured</span>
+                <span className="badge-item"><Lock size={14} /> Secure</span>
+                <span className="badge-item"><CheckCircle size={14} /> Verified</span>
+                <span className="badge-item"><Shield size={14} /> Insured</span>
               </div>
             </div>
           </div>
