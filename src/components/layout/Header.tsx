@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { Crown } from 'lucide-react';
 import './Header.scss';
 
 export default function Header() {
@@ -12,7 +13,7 @@ export default function Header() {
       <nav className="navbar navbar-expand-lg navbar-dark">
         <div className="container">
           <Link href="/" className="navbar-brand">
-            <span className="brand-icon">👑</span>
+            <span className="brand-icon"><Crown size={28} /></span>
             <span className="brand-text">DeKingsPalace</span>
           </Link>
           <button
