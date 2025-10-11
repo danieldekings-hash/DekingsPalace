@@ -1,0 +1,171 @@
+@import './tokens';
+
+// Utility Classes
+.text-gradient {
+  background: linear-gradient(135deg, $primary-color, darken($primary-color, 15%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hover-bg-light {
+  &:hover {
+    background-color: rgba($primary-color, 0.05);
+  }
+}
+
+// Card Styles
+.card-hover {
+  transition: all $transition-base;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-lg;
+  }
+}
+
+// Hero Section
+.hero-section {
+  background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 15%) 100%);
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+}
+
+// Dashboard Layout
+.dashboard-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// Loading Spinner
+.spinner-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 0.3rem solid rgba($primary-color, 0.2);
+  border-top-color: $primary-color;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Badge Styles
+.badge-custom {
+  padding: 0.5rem 1rem;
+  border-radius: $border-radius-lg;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+}
+
+// Form Styles
+.form-floating-custom {
+  position: relative;
+  
+  input,
+  textarea {
+    border: 2px solid $border-color;
+    border-radius: $border-radius;
+    padding: 1rem;
+    transition: all $transition-base;
+    
+    &:focus {
+      border-color: $primary-color;
+      box-shadow: 0 0 0 0.2rem rgba($primary-color, 0.15);
+      outline: none;
+    }
+  }
+}
+
+// Alert Styles
+.alert-custom {
+  border-radius: $border-radius;
+  padding: 1rem 1.5rem;
+  border-left: 4px solid;
+  
+  &.alert-info {
+    background-color: lighten($info-color, 35%);
+    border-color: $info-color;
+    color: darken($info-color, 30%);
+  }
+  
+  &.alert-success {
+    background-color: lighten($success-color, 50%);
+    border-color: $success-color;
+    color: darken($success-color, 30%);
+  }
+  
+  &.alert-warning {
+    background-color: lighten($warning-color, 35%);
+    border-color: $warning-color;
+    color: darken($warning-color, 40%);
+  }
+  
+  &.alert-danger {
+    background-color: lighten($danger-color, 35%);
+    border-color: $danger-color;
+    color: darken($danger-color, 20%);
+  }
+}
+
+// Table Styles
+.table-custom {
+  border-radius: $border-radius;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  
+  thead {
+    background-color: $bg-secondary;
+    
+    th {
+      font-weight: $font-weight-semibold;
+      text-transform: uppercase;
+      font-size: $font-size-sm;
+      letter-spacing: 0.5px;
+      padding: 1rem;
+    }
+  }
+  
+  tbody {
+    tr {
+      transition: background-color $transition-fast;
+      
+      &:hover {
+        background-color: rgba($primary-color, 0.03);
+      }
+      
+      td {
+        padding: 1rem;
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+// Responsive utilities
+@media (max-width: $breakpoint-md) {
+  .hero-section {
+    min-height: 400px;
+    padding: 2rem 0;
+  }
+  
+  .display-4 {
+    font-size: 2rem;
+  }
+  
+  .display-5 {
+    font-size: 1.75rem;
+  }
+}

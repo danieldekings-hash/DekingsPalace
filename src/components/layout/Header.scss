@@ -1,0 +1,151 @@
+@import '../../styles/tokens';
+
+.site-header {
+  background: rgba($bg-dark, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba($primary-color, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: $z-index-sticky;
+  transition: all 0.3s ease;
+
+  .navbar {
+    padding: 1rem 0;
+  }
+
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $text-primary;
+    text-decoration: none;
+    transition: all 0.3s ease;
+
+    &:hover {
+      color: $primary-color;
+      transform: translateY(-2px);
+    }
+
+    .brand-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 2px 8px rgba($primary-color, 0.3));
+    }
+
+    .brand-text {
+      background: linear-gradient(135deg, $text-primary 0%, $primary-color 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  }
+
+  .nav-link {
+    color: $text-secondary;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: $primary-color;
+      transition: width 0.3s ease;
+    }
+
+    &:hover {
+      color: $primary-color;
+
+      &::after {
+        width: 80%;
+      }
+    }
+
+    &.active {
+      color: $primary-color;
+
+      &::after {
+        width: 80%;
+      }
+    }
+  }
+
+  .btn-gold-header {
+    background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 10%) 100%);
+    color: $text-dark;
+    border: none;
+    padding: 0.625rem 1.5rem;
+    font-weight: 600;
+    border-radius: $border-radius;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba($primary-color, 0.3);
+    text-decoration: none;
+    display: inline-block;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba($primary-color, 0.4);
+      color: $text-dark;
+    }
+  }
+
+  .btn-outline-gold-header {
+    background: transparent;
+    color: $primary-color;
+    border: 2px solid $primary-color;
+    padding: 0.5rem 1.25rem;
+    font-weight: 600;
+    border-radius: $border-radius;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+
+    &:hover {
+      background: $primary-color;
+      color: $text-dark;
+      transform: translateY(-2px);
+    }
+  }
+
+  .navbar-toggler {
+    border-color: rgba($primary-color, 0.3);
+
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba($primary-color, 0.25);
+    }
+
+    .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23D4AF37' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+  }
+}
+
+@media (max-width: $breakpoint-lg) {
+  .site-header {
+    .navbar-collapse {
+      background: rgba($bg-card, 0.98);
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: $border-radius;
+      border: 1px solid rgba($primary-color, 0.1);
+    }
+
+    .nav-item {
+      margin: 0.5rem 0;
+    }
+
+    .btn-gold-header,
+    .btn-outline-gold-header {
+      width: 100%;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+  }
+}

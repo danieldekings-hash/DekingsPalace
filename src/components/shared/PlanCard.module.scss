@@ -1,0 +1,138 @@
+@import '../../styles/tokens';
+
+.planCard {
+  background: white;
+  border-radius: $border-radius-lg;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  &__header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, $primary-color, darken($primary-color, 10%));
+    color: white;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  &__description {
+    font-size: 0.9rem;
+    opacity: 0.95;
+    margin-bottom: 0;
+  }
+
+  &__body {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__roi {
+    text-align: center;
+    padding: 1.5rem;
+    background: lighten($primary-color, 45%);
+    border-radius: $border-radius;
+    margin-bottom: 1.5rem;
+  }
+
+  &__roiValue {
+    display: block;
+    font-size: 3rem;
+    font-weight: 700;
+    color: $primary-color;
+    line-height: 1;
+  }
+
+  &__roiLabel {
+    display: block;
+    font-size: 0.875rem;
+    color: $text-secondary;
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  &__details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid $border-color;
+  }
+
+  &__detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__detailLabel {
+    font-size: 0.875rem;
+    color: $text-secondary;
+  }
+
+  &__detailValue {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $text-primary;
+  }
+
+  &__features {
+    margin-bottom: 1.5rem;
+  }
+
+  &__featuresTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: $text-primary;
+  }
+
+  &__featuresList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  &__feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+    color: $text-secondary;
+  }
+
+  &__featureIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: $success-color;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  &__footer {
+    padding: 0 1.5rem 1.5rem;
+    margin-top: auto;
+  }
+}
