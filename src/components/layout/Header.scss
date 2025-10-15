@@ -137,6 +137,71 @@
   }
 }
 
+// Gold variant intended for dashboard pages
+.site-header--gold {
+  background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 10%) 100%);
+  border-bottom: none;
+
+  .navbar-brand {
+    .brand-text {
+      // solid dark text on gold background
+      -webkit-text-fill-color: initial;
+      background: none;
+      color: $text-dark;
+      font-weight: 700;
+    }
+
+    .brand-icon {
+      color: $text-dark;
+      filter: none;
+    }
+  }
+
+  .nav-link {
+    color: rgba($text-dark, 0.85);
+
+    &::after {
+      background: $text-dark;
+    }
+
+    &:hover,
+    &.active {
+      color: $text-dark;
+    }
+  }
+
+  .navbar-toggler {
+    border-color: rgba($text-dark, 0.3);
+
+    .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%230a0a0a' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+  }
+
+  .btn-gold-header {
+    background: $text-dark;
+    color: $primary-color;
+    box-shadow: 0 2px 10px rgba($text-dark, 0.25);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba($text-dark, 0.35);
+      color: $primary-color;
+    }
+  }
+
+  .btn-outline-gold-header {
+    background: transparent;
+    color: $text-dark;
+    border: 2px solid $text-dark;
+
+    &:hover {
+      background: $text-dark;
+      color: $primary-color;
+    }
+  }
+}
+
 @media (max-width: $breakpoint-lg) {
   .site-header {
     .navbar-collapse {

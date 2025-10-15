@@ -2,10 +2,13 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Crown, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import './login.scss';
+import api from '@/lib/api';
+import { setToken } from '@/lib/auth';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,11 +17,37 @@ export default function LoginPage() {
     password: '',
     rememberMe: false,
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login submitted:', formData);
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await api.login({ email: formData.email, password: formData.password });
+      // store token
+      setToken(res.token, !!formData.rememberMe, res.user);
+      // redirect to dashboard
+      router.push('/dashboard');
+    } catch (err: unknown) {
+      // normalize unknown error without using `any`
+      console.error('Login error', err);
+      const getErrorMessage = (e: unknown) => {
+        if (e instanceof Error) return e.message;
+        if (typeof e === 'string') return e;
+        try {
+          return JSON.stringify(e) || 'Login failed';
+        } catch {
+          return 'Login failed';
+        }
+      };
+
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,8 +137,10 @@ export default function LoginPage() {
               </div>
 
               <button type="submit" className="btn btn-gold btn-block">
-                Sign In
+                {loading ? 'Signing in...' : 'Sign In'}
               </button>
+
+              {error && <div className="alert alert-danger mt-3">{error}</div>}
 
               <div className="auth-divider">
                 <span>or</span>

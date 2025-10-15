@@ -1,8 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PlanCard from '@/components/shared/PlanCard';
 import { Plan } from '@/types/plans';
+import './dashboard.scss';
+import { Wallet as WalletIcon, BarChart2, TrendingUp, CreditCard } from 'lucide-react';
+import { getUser } from '@/lib/auth';
+
+type StoredUser = {
+  id?: string;
+  email?: string;
+  name?: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+};
 
 // Mock data - replace with API call
 const mockPlans: Plan[] = [
@@ -35,26 +47,36 @@ export default function DashboardPage() {
     totalEarnings: 750,
     availableBalance: 1250,
   });
+  const [displayName, setDisplayName] = useState('');
+
+  // Read user from web storage only after the component mounts on the client
+  useEffect(() => {
+    const user = getUser() as StoredUser | null;
+    const name = (user && (user.fullName || user.name || user.email)) || '';
+    setDisplayName(name);
+  }, []);
 
   return (
-    <div className="dashboard-page">
+    <div className="dashboard-page container-custom">
       <div className="mb-4">
-        <h1 className="h2 fw-bold">Dashboard</h1>
-        <p className="text-muted">Welcome back! Here's your investment overview.</p>
+        <h1 className="display-6 fw-bold text-gradient">Dashboard</h1>
+        <p className="text-secondary">
+          <span className="fw-bold text-white">{`Welcome back${displayName ? `, ${displayName}` : ''}!`}</span> {" "}Here's your investment overview.
+        </p>
       </div>
 
       {/* Stats Cards */}
       <div className="row g-4 mb-5">
         <div className="col-md-6 col-lg-3">
-          <div className="card border-0 shadow-sm">
+          <div className="card border-gold card-hover">
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <p className="text-muted mb-1 small">Total Investment</p>
-                  <h3 className="fw-bold mb-0">${stats.totalInvestment.toLocaleString()}</h3>
+                  <p className="text-secondary mb-1 small">Total Investment</p>
+                  <h3 className="fw-bold mb-0 text-gold">${stats.totalInvestment.toLocaleString()}</h3>
                 </div>
-                <div className="text-primary">
-                  <span className="fs-1">💰</span>
+                <div className="text-gold">
+                  <WalletIcon size={28} />
                 </div>
               </div>
             </div>
@@ -62,15 +84,15 @@ export default function DashboardPage() {
         </div>
 
         <div className="col-md-6 col-lg-3">
-          <div className="card border-0 shadow-sm">
+          <div className="card border-gold card-hover">
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <p className="text-muted mb-1 small">Active Investments</p>
+                  <p className="text-secondary mb-1 small">Active Investments</p>
                   <h3 className="fw-bold mb-0">{stats.activeInvestments}</h3>
                 </div>
-                <div className="text-success">
-                  <span className="fs-1">📊</span>
+                <div className="text-gold">
+                  <BarChart2 size={28} />
                 </div>
               </div>
             </div>
@@ -78,17 +100,17 @@ export default function DashboardPage() {
         </div>
 
         <div className="col-md-6 col-lg-3">
-          <div className="card border-0 shadow-sm">
+          <div className="card border-gold card-hover">
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <p className="text-muted mb-1 small">Total Earnings</p>
-                  <h3 className="fw-bold mb-0 text-success">
+                  <p className="text-secondary mb-1 small">Total Earnings</p>
+                  <h3 className="fw-bold mb-0 text-gold">
                     +${stats.totalEarnings.toLocaleString()}
                   </h3>
                 </div>
-                <div className="text-success">
-                  <span className="fs-1">📈</span>
+                <div className="text-gold">
+                  <TrendingUp size={28} />
                 </div>
               </div>
             </div>
@@ -96,15 +118,15 @@ export default function DashboardPage() {
         </div>
 
         <div className="col-md-6 col-lg-3">
-          <div className="card border-0 shadow-sm">
+          <div className="card border-gold card-hover">
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <p className="text-muted mb-1 small">Available Balance</p>
+                  <p className="text-secondary mb-1 small">Available Balance</p>
                   <h3 className="fw-bold mb-0">${stats.availableBalance.toLocaleString()}</h3>
                 </div>
-                <div className="text-info">
-                  <span className="fs-1">💳</span>
+                <div className="text-gold">
+                  <CreditCard size={28} />
                 </div>
               </div>
             </div>
@@ -114,7 +136,7 @@ export default function DashboardPage() {
 
       {/* Investment Plans */}
       <div className="mb-4">
-        <h2 className="h4 fw-bold mb-3">Available Investment Plans</h2>
+        <h2 className="h4 fw-bold mb-3 text-gold">Available Investment Plans</h2>
       </div>
       <div className="row g-4">
         {mockPlans.map((plan) => (
@@ -126,30 +148,30 @@ export default function DashboardPage() {
 
       {/* Recent Activity */}
       <div className="mt-5">
-        <h2 className="h4 fw-bold mb-3">Recent Activity</h2>
-        <div className="card border-0 shadow-sm">
+        <h2 className="h4 fw-bold mb-3 text-gold">Recent Activity</h2>
+        <div className="card border-gold card-hover">
           <div className="card-body">
             <div className="list-group list-group-flush">
               <div className="list-group-item d-flex justify-content-between align-items-center px-0">
                 <div>
                   <h6 className="mb-1">Investment in Professional Plan</h6>
-                  <small className="text-muted">2 days ago</small>
+                  <small className="text-secondary">2 days ago</small>
                 </div>
-                <span className="badge bg-success">+$100</span>
+                <span className="badge badge-custom" style={{ backgroundColor: 'rgba(212, 175, 55, 0.15)', color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.35)' }}>+$100</span>
               </div>
               <div className="list-group-item d-flex justify-content-between align-items-center px-0">
                 <div>
                   <h6 className="mb-1">Withdrawal Completed</h6>
-                  <small className="text-muted">5 days ago</small>
+                  <small className="text-secondary">5 days ago</small>
                 </div>
-                <span className="badge bg-info">$500</span>
+                <span className="badge badge-custom" style={{ backgroundColor: 'rgba(212, 175, 55, 0.15)', color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.35)' }}>$500</span>
               </div>
               <div className="list-group-item d-flex justify-content-between align-items-center px-0">
                 <div>
                   <h6 className="mb-1">Investment in Starter Plan</h6>
-                  <small className="text-muted">1 week ago</small>
+                  <small className="text-secondary">1 week ago</small>
                 </div>
-                <span className="badge bg-success">+$50</span>
+                <span className="badge badge-custom" style={{ backgroundColor: 'rgba(212, 175, 55, 0.15)', color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.35)' }}>+$50</span>
               </div>
             </div>
           </div>

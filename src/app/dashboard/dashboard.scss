@@ -1,0 +1,61 @@
+@import '@/styles/tokens';
+
+.dashboard-page {
+  .card {
+    background-color: $bg-card;
+    border-radius: $border-radius-lg;
+  }
+
+  .list-group-item {
+    background-color: transparent;
+    border-color: rgba($primary-color, 0.15);
+  }
+}
+
+// Make dashboard content use a wider, responsive container than the global default
+.dashboard-page.container-custom {
+  max-width: 960px; // default for >= lg
+
+  @media (min-width: $breakpoint-md) {
+    max-width: 720px;
+  }
+
+  @media (min-width: $breakpoint-lg) {
+    max-width: 960px;
+  }
+
+  @media (min-width: $breakpoint-xl) {
+    max-width: 1140px;
+  }
+
+  @media (min-width: $breakpoint-xxl) {
+    max-width: 1320px;
+  }
+}
+
+// Ensure content sits below fixed header on dashboard pages
+.dashboard-layout {
+  padding-top: 80px; // accommodates fixed navbar height
+}
+
+// Responsive behavior for fixed sidebar and content
+@media (min-width: 992px) { // lg and up
+  .dashboard-layout {
+    padding-left: 250px; // space for fixed sidebar on large screens
+  }
+}
+
+@media (max-width: 991.98px) { // below lg
+  .dashboard-layout {
+    padding-left: 0; // full width on small screens
+  }
+}
+
+// Increase top padding on small screens where header is taller
+@media (max-width: 575.98px) {
+  .dashboard-layout {
+    padding-top: 96px;
+  }
+}
+
+

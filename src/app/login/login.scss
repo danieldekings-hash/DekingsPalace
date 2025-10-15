@@ -6,6 +6,10 @@
   padding: 120px 1rem 4rem;
   position: relative;
 
+  @media (max-width: $breakpoint-sm) {
+    padding: 96px 0.75rem 2.5rem;
+  }
+
   &::before {
     content: '';
     position: absolute;
@@ -30,6 +34,16 @@
     grid-template-columns: 1fr;
     max-width: 500px;
   }
+
+  @media (max-width: $breakpoint-md) {
+    max-width: 420px;
+    gap: 2rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    max-width: 360px;
+    gap: 1.5rem;
+  }
 }
 
 .auth-card {
@@ -41,8 +55,11 @@
   position: relative;
   z-index: 1;
 
+  @media (max-width: $breakpoint-md) {
+    padding: 2rem;
+  }
   @media (max-width: $breakpoint-sm) {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1rem;
   }
 }
 
@@ -83,6 +100,14 @@
     color: $text-secondary;
     margin: 0;
   }
+  @media (max-width: $breakpoint-sm) {
+    .auth-title {
+      font-size: 1.5rem;
+    }
+    .auth-subtitle {
+      font-size: 0.9rem;
+    }
+  }
 }
 
 .auth-form {
@@ -112,6 +137,11 @@
       color: $text-primary;
       font-size: 1rem;
       transition: all $transition-base;
+
+      @media (max-width: $breakpoint-sm) {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.95rem;
+      }
 
       &::placeholder {
         color: $text-muted;
@@ -160,6 +190,12 @@
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
     gap: 1rem;
+
+    @media (max-width: $breakpoint-sm) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.75rem;
+    }
 
     .form-check {
       display: flex;
@@ -215,6 +251,11 @@
     transition: all $transition-base;
     box-shadow: 0 4px 15px rgba($primary-color, 0.3);
     cursor: pointer;
+
+    @media (max-width: $breakpoint-sm) {
+      padding: 0.875rem;
+      font-size: 1rem;
+    }
 
     &:hover {
       transform: translateY(-2px);

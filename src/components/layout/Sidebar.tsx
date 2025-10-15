@@ -2,15 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import '@/styles/components.scss';
+import { LayoutDashboard, BarChart3, ClipboardList, Receipt, Wallet, Users, MessageCircle } from 'lucide-react';
 
-const menuItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: '📊' },
-  { href: '/dashboard/investments', label: 'My Investments', icon: '💰' },
-  { href: '/dashboard/plans', label: 'Investment Plans', icon: '📋' },
-  { href: '/dashboard/transactions', label: 'Transactions', icon: '💳' },
-  { href: '/dashboard/wallet', label: 'Wallet', icon: '👛' },
-  { href: '/dashboard/referrals', label: 'Referrals', icon: '👥' },
-  { href: '/dashboard/support', label: 'Support', icon: '💬' },
+export const menuItems = [
+  { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+  { href: '/dashboard/investments', label: 'My Investments', icon: <BarChart3 size={18} /> },
+  { href: '/dashboard/plans', label: 'Investment Plans', icon: <ClipboardList size={18} /> },
+  { href: '/dashboard/transactions', label: 'Transactions', icon: <Receipt size={18} /> },
+  { href: '/dashboard/wallet', label: 'Wallet', icon: <Wallet size={18} /> },
+  { href: '/dashboard/referrals', label: 'Referrals', icon: <Users size={18} /> },
+  { href: '/dashboard/support', label: 'Support', icon: <MessageCircle size={18} /> },
 ];
 
 export default function Sidebar() {
@@ -18,8 +20,8 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="bg-light border-end"
-      style={{ width: '250px', minHeight: 'calc(100vh - 120px)' }}
+      className="bg-card-custom border-gold position-fixed d-none d-lg-block"
+      style={{ top: 80, left: 0, width: '250px', height: 'calc(100vh - 80px)', overflowY: 'auto', borderRightWidth: 1, borderRightStyle: 'solid' }}
     >
       <nav className="py-3">
         <ul className="list-unstyled">
@@ -31,14 +33,14 @@ export default function Sidebar() {
                   href={item.href}
                   className={`d-flex align-items-center px-4 py-3 text-decoration-none ${
                     isActive
-                      ? 'bg-primary text-white fw-semibold'
-                      : 'text-dark hover-bg-light'
+                      ? 'text-gold fw-semibold'
+                      : 'text-secondary hover-bg-light'
                   }`}
                   style={{
                     transition: 'all 0.2s ease',
                   }}
                 >
-                  <span className="me-3 fs-5">{item.icon}</span>
+                  <span className="me-3" style={{ display: 'inline-flex' }}>{item.icon}</span>
                   <span>{item.label}</span>
                 </Link>
               </li>
