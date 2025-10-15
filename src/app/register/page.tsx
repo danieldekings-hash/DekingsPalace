@@ -2,10 +2,13 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Crown, Mail, Lock, User, Phone, Eye, EyeOff, Users } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import './register.scss';
+import api from '@/lib/api';
+import { setToken } from '@/lib/auth';
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,18 +22,51 @@ export default function RegisterPage() {
     referralCode: '',
     agreeToTerms: false,
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate passwords match
+    setError(null);
+
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match!');
+      setError('Passwords do not match');
       return;
     }
 
-    // Handle registration logic here
-    console.log('Registration submitted:', formData);
+    if (!formData.agreeToTerms) {
+      setError('You must agree to the terms to continue');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await api.register({
+        fullName: formData.fullName,
+        email: formData.email,
+        phoneNumber: formData.phone,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        referralCode: formData.referralCode || undefined,
+        role: 'investor',
+      });
+      setToken(res.token, true, res.user);
+      router.push('/dashboard');
+    } catch (err: unknown) {
+      const getErrorMessage = (e: unknown) => {
+        if (e instanceof Error) return e.message;
+        if (typeof e === 'string') return e;
+        try {
+          return JSON.stringify(e) || 'Registration failed';
+        } catch {
+          return 'Registration failed';
+        }
+      };
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,9 +241,11 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <button type="submit" className="btn btn-gold btn-block">
-                Create Account
+              <button type="submit" className="btn btn-gold btn-block" disabled={loading}>
+                {loading ? 'Creating Account...' : 'Create Account'}
               </button>
+
+              {error && <div className="alert alert-danger mt-3">{error}</div>}
 
               <div className="auth-divider">
                 <span>or</span>

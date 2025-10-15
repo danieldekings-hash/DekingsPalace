@@ -16,6 +16,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
+  // Increase readability while keeping compact layout
+  font-size: 80%;
 }
 
 body {
@@ -41,9 +43,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .container-custom {
-  max-width: 1200px;
+  max-width: 700px;
   margin: 0 auto;
   padding: 0 1rem;
+}
+
+@media (min-width: $breakpoint-xxl) {
+  .container-custom {
+    max-width: 700px; // keep content comfortable on very large screens
+  }
 }
 
 // Bootstrap overrides for dark theme

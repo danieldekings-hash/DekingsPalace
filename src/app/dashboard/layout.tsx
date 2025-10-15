@@ -1,6 +1,7 @@
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
 import Footer from '@/components/layout/Footer';
+import '@/styles/components.scss';
 
 export default function DashboardLayout({
   children,
@@ -8,7 +9,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="dashboard-layout">
+    <div className="dashboard-layout bg-dark-custom">
       <Navbar />
       <div className="d-flex">
         <Sidebar />
@@ -16,7 +17,9 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
-      <Footer />
+      <footer className="text-center py-3" style={{ borderTop: '1px solid rgba(212, 175, 55, 0.15)' }}>
+        <small className="text-secondary">© {new Date().getFullYear()} DeKingsPalace</small>
+      </footer>
     </div>
   );
 }

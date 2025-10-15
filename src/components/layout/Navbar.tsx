@@ -2,18 +2,22 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { Crown } from 'lucide-react';
+import './Header.scss';
+import MobileSidebar from './MobileSidebar';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <nav className="navbar navbar-expand-lg navbar-dark site-header site-header--gold">
       <div className="container-fluid px-4">
-        <Link href="/dashboard" className="navbar-brand fw-bold">
-          👑 DeKingsPalace
+        <Link href="/dashboard" className="navbar-brand">
+          <span className="brand-icon"><Crown size={24} /></span>
+          <span className="brand-text">DeKingsPalace</span>
         </Link>
         <button
-          className="navbar-toggler"
+          className="navbar-toggler border-0"
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           aria-controls="navbarContent"
@@ -23,7 +27,7 @@ export default function Navbar() {
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className={`collapse navbar-collapse ${isOpen ? 'show' : ''}`} id="navbarContent">
-          <ul className="navbar-nav ms-auto">
+          <ul className="navbar-nav ms-auto align-items-lg-center">
             <li className="nav-item dropdown">
               <a
                 className="nav-link dropdown-toggle"
@@ -58,6 +62,8 @@ export default function Navbar() {
           </ul>
         </div>
       </div>
+      {/* Mobile Drawer */}
+      <MobileSidebar isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </nav>
   );
 }
