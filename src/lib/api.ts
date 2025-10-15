@@ -44,7 +44,9 @@ function getBaseUrl() {
 }
 
 async function postJson<TReq extends object, TRes>(path: string, body: TReq): Promise<TRes> {
-  const primaryUrl = `${getBaseUrl()}${path}`;
+  // In the browser, always use same-origin so Next.js rewrites handle proxying to the API
+  const isBrowser = typeof window !== 'undefined';
+  const primaryUrl = isBrowser ? path : `${getBaseUrl()}${path}`;
   const canTryDevFallback =
     (!process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_URL.trim().length === 0)
     && typeof window !== 'undefined'
