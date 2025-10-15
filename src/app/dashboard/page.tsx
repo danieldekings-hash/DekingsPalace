@@ -7,6 +7,15 @@ import './dashboard.scss';
 import { Wallet as WalletIcon, BarChart2, TrendingUp, CreditCard } from 'lucide-react';
 import { getUser } from '@/lib/auth';
 
+type StoredUser = {
+  id?: string;
+  email?: string;
+  name?: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+};
+
 // Mock data - replace with API call
 const mockPlans: Plan[] = [
   {
@@ -42,7 +51,7 @@ export default function DashboardPage() {
 
   // Read user from web storage only after the component mounts on the client
   useEffect(() => {
-    const user = getUser() as any | null;
+    const user = getUser() as StoredUser | null;
     const name = (user && (user.fullName || user.name || user.email)) || '';
     setDisplayName(name);
   }, []);
