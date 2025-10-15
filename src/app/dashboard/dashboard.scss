@@ -12,6 +12,27 @@
   }
 }
 
+// Make dashboard content use a wider, responsive container than the global default
+.dashboard-page.container-custom {
+  max-width: 960px; // default for >= lg
+
+  @media (min-width: $breakpoint-md) {
+    max-width: 720px;
+  }
+
+  @media (min-width: $breakpoint-lg) {
+    max-width: 960px;
+  }
+
+  @media (min-width: $breakpoint-xl) {
+    max-width: 1140px;
+  }
+
+  @media (min-width: $breakpoint-xxl) {
+    max-width: 1320px;
+  }
+}
+
 // Ensure content sits below fixed header on dashboard pages
 .dashboard-layout {
   padding-top: 80px; // accommodates fixed navbar height
