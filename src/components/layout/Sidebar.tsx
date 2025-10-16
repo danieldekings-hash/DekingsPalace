@@ -23,7 +23,7 @@ export default function Sidebar() {
       className="bg-card-custom border-gold position-fixed d-none d-lg-block"
       style={{ top: 80, left: 0, width: '250px', height: 'calc(100vh - 80px)', overflowY: 'auto', borderRightWidth: 1, borderRightStyle: 'solid' }}
     >
-      <nav className="py-3">
+      <nav className="py-3 sidebar-nav">
         <ul className="list-unstyled">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
