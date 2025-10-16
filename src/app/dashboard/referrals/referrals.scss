@@ -1,0 +1,40 @@
+@import '@/styles/tokens';
+
+.referral-card {
+  background-color: $bg-card;
+}
+
+.input-wrapper {
+  position: relative;
+  border: 1px solid rgba($primary-color, 0.35);
+  border-radius: $border-radius;
+  overflow: hidden;
+
+  input.form-control {
+    border: none;
+    outline: none;
+    padding-right: 2.5rem;
+    height: 44px;
+    background-color: $bg-dark;
+    color: $text-primary;
+  }
+
+  .icon-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: $text-secondary;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: $text-gold;
+    }
+  }
+}
+
+

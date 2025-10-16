@@ -1,6 +1,10 @@
 @import './tokens';
 
 // Utility Classes
+.sidebar-nav {
+  font-size: 1rem; // increase sidebar font size
+}
+
 .text-gradient {
   background: linear-gradient(135deg, $primary-color, darken($primary-color, 15%));
   -webkit-background-clip: text;

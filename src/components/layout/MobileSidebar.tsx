@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import '@/styles/components.scss';
 import { usePathname } from 'next/navigation';
 import { menuItems } from './Sidebar';
 
@@ -38,7 +39,7 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
           overflowY: 'auto',
         }}
       >
-        <nav className="py-3">
+        <nav className="py-3 sidebar-nav">
           <ul className="list-unstyled">
             {menuItems.map((item) => {
               const isActive = pathname === item.href;
@@ -63,6 +64,7 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
     </>
   );
 }
+
 
 
 
