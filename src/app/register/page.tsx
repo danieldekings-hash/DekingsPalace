@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Crown, Mail, Lock, User, Phone, Eye, EyeOff, Users } from 'lucide-react';
 import Header from '@/components/layout/Header';
@@ -9,6 +9,16 @@ import Footer from '@/components/layout/Footer';
 import './register.scss';
 import api from '@/lib/api';
 import { setToken } from '@/lib/auth';
+
+function PrefillReferral({ onPrefill }: { onPrefill: (ref: string) => void }) {
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const ref = searchParams?.get('ref');
+    if (ref) onPrefill(ref);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return null;
+}
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,16 +35,6 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  // Prefill referral code from ?ref query param on first render
-  useEffect(() => {
-    const ref = searchParams?.get('ref');
-    if (ref) {
-      setFormData(prev => ({ ...prev, referralCode: ref }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +102,9 @@ export default function RegisterPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="auth-form">
+              <Suspense fallback={null}>
+                <PrefillReferral onPrefill={(ref) => setFormData(prev => ({ ...prev, referralCode: ref }))} />
+              </Suspense>
               <div className="form-group">
                 <label htmlFor="fullName" className="form-label">
                   <User size={18} />
