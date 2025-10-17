@@ -1,0 +1,95 @@
+@import '@/styles/tokens';
+
+.wallet-page {
+  .wallet-hero .hero-subtitle {
+    max-width: 720px;
+  }
+
+  .wallet-card {
+    max-width: 780px;
+    background-color: $bg-card;
+    border-radius: $border-radius-lg;
+  }
+
+  .wallet-summary {
+    background-color: $bg-card;
+    max-width: 780px; // align with form
+    .summary-address {
+      max-width: 520px;
+    }
+  }
+
+  .wallet-form {
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      color: $text-primary;
+      font-weight: $font-weight-medium;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .select-wrapper {
+      position: relative;
+
+      .form-select {
+        appearance: none;
+        padding-right: 2rem;
+        border: 1px solid rgba($primary-color, 0.35);
+        color: $text-primary;
+        background-color: $bg-dark;
+      }
+
+      .chevron {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $text-secondary;
+        pointer-events: none;
+      }
+    }
+
+    .input-wrapper {
+      position: relative;
+      border: 1px solid rgba($primary-color, 0.35);
+      border-radius: $border-radius;
+      overflow: hidden;
+
+      input.form-control {
+        border: none;
+        outline: none;
+        padding-right: 2.5rem;
+        height: 44px;
+        background-color: $bg-dark;
+        color: $text-primary;
+      }
+
+      .icon-btn {
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: $text-secondary;
+        cursor: pointer;
+        padding: 0.25rem;
+        transition: color $transition-fast;
+
+        &:hover {
+          color: $text-gold;
+        }
+      }
+    }
+  }
+
+  // Ensure dark text on gold primary button for wallet CTA
+  .btn-gold-dark-text {
+    color: $text-dark !important;
+  }
+}
+
+
