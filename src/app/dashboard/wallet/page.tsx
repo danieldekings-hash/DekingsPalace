@@ -14,7 +14,7 @@ export default function WalletPage() {
   const [amount, setAmount] = useState('');
   const [copied, setCopied] = useState(false);
   const [balances, setBalances] = useState<Record<Currency, number>>({ BTC: 0.0, ETH: 0.0, USDT: 0.0 });
-  const [deposits, setDeposits] = useState<Array<{ id: string; currency: Currency; amount: number; date: string }>>([
+  const [deposits] = useState<Array<{ id: string; currency: Currency; amount: number; date: string }>>([
     { id: 'DP-202510-0001', currency: 'BTC', amount: 0.25, date: '2025-10-01' },
     { id: 'DP-202510-0002', currency: 'USDT', amount: 1500, date: '2025-10-10' },
   ]);
