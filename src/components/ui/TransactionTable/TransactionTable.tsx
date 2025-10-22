@@ -27,6 +27,15 @@ export interface TransactionTableProps {
   sortDirection?: 'asc' | 'desc';
   className?: string;
   onTransactionClick?: (transaction: Transaction) => void;
+  // Enhanced table props
+  pagination?: boolean;
+  itemsPerPage?: number;
+  showPaginationInfo?: boolean;
+  showItemsPerPageSelector?: boolean;
+  itemsPerPageOptions?: number[];
+  slider?: boolean;
+  sliderHeight?: string;
+  sliderWidth?: string;
 }
 
 export default function TransactionTable({
@@ -36,24 +45,17 @@ export default function TransactionTable({
   sortColumn,
   sortDirection,
   className = '',
-  onTransactionClick
+  onTransactionClick,
+  // Enhanced table props
+  pagination = false,
+  itemsPerPage = 10,
+  showPaginationInfo = true,
+  showItemsPerPageSelector = true,
+  itemsPerPageOptions = [5, 10, 25, 50, 100],
+  slider = false,
+  sliderHeight = '400px',
+  sliderWidth = '100%'
 }: TransactionTableProps) {
-  const getStatusIcon = (status: TransactionStatus) => {
-    const iconProps = { size: 16 };
-    
-    switch (status) {
-      case 'completed':
-        return <CheckCircle {...iconProps} className="text-success" />;
-      case 'pending':
-        return <Clock {...iconProps} className="text-warning" />;
-      case 'processing':
-        return <ArrowUpDown {...iconProps} className="text-info" />;
-      case 'failed':
-        return <XCircle {...iconProps} className="text-danger" />;
-      default:
-        return <AlertCircle {...iconProps} className="text-secondary" />;
-    }
-  };
 
   const getStatusBadgeClass = (status: TransactionStatus) => {
     switch (status) {
@@ -70,22 +72,6 @@ export default function TransactionTable({
     }
   };
 
-  const getTypeBadgeClass = (type: TransactionType) => {
-    switch (type) {
-      case 'deposit':
-        return 'badge bg-primary';
-      case 'withdrawal':
-        return 'badge bg-danger';
-      case 'investment':
-        return 'badge bg-info';
-      case 'profit':
-        return 'badge bg-success';
-      case 'referral':
-        return 'badge bg-warning';
-      default:
-        return 'badge bg-secondary';
-    }
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -174,6 +160,15 @@ export default function TransactionTable({
         hoverable={true}
         striped={false}
         bordered={true}
+        // Enhanced table props
+        pagination={pagination}
+        itemsPerPage={itemsPerPage}
+        showPaginationInfo={showPaginationInfo}
+        showItemsPerPageSelector={showItemsPerPageSelector}
+        itemsPerPageOptions={itemsPerPageOptions}
+        slider={slider}
+        sliderHeight={sliderHeight}
+        sliderWidth={sliderWidth}
       />
     </div>
   );

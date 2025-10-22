@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Search, Filter, Download } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import TransactionTable, { Transaction, TransactionType, TransactionStatus } from '@/components/ui/TransactionTable';
 import '../dashboard.scss';
@@ -15,8 +15,6 @@ export default function TransactionsPage() {
   const [filterStatus, setFilterStatus] = useState<TransactionStatus | 'all'>('all');
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'type'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
 
   // Sample transaction data
   const transactions: Transaction[] = [
@@ -102,7 +100,7 @@ export default function TransactionsPage() {
 
   // Filter and sort transactions
   const filteredTransactions = useMemo(() => {
-    let filtered = transactions.filter(transaction => {
+    const filtered = transactions.filter(transaction => {
       const matchesSearch = transaction.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            transaction.reference?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -133,19 +131,8 @@ export default function TransactionsPage() {
     });
 
     return filtered;
-  }, [searchTerm, filterType, filterStatus, sortBy, sortOrder]);
+  }, [transactions, searchTerm, filterType, filterStatus, sortBy, sortOrder]);
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedTransactions = filteredTransactions.slice(startIndex, endIndex);
-
-  // Reset to first page when filters change
-  const handleFilterChange = (newFilter: any) => {
-    setCurrentPage(1);
-    return newFilter;
-  };
 
   const handleSort = (column: string, direction: 'asc' | 'desc') => {
     const fieldMap: Record<string, 'date' | 'amount' | 'type'> = {
@@ -270,7 +257,6 @@ export default function TransactionsPage() {
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
-                  setCurrentPage(1);
                 }}
               />
             </div>
@@ -283,7 +269,6 @@ export default function TransactionsPage() {
               value={filterType}
               onChange={(e) => {
                 setFilterType(e.target.value as TransactionType | 'all');
-                setCurrentPage(1);
               }}
             >
               <option value="all">All Crypto</option>
@@ -314,7 +299,6 @@ export default function TransactionsPage() {
               value={filterStatus}
               onChange={(e) => {
                 setFilterStatus(e.target.value as TransactionStatus | 'all');
-                setCurrentPage(1);
               }}
             >
               <option value="all">All Status</option>
@@ -345,84 +329,51 @@ export default function TransactionsPage() {
         <div className="card border-gold card-hover">
           <div className="card-body p-0">
             <TransactionTable
-              transactions={paginatedTransactions}
+              transactions={transactions}
               onSort={handleSort}
               sortColumn={sortBy}
               sortDirection={sortOrder}
               onTransactionClick={(transaction) => {
-                console.log('Transaction clicked:', transaction);
                 // Add transaction detail modal or navigation logic here
+                // console.log('Transaction clicked:', transaction);
               }}
+              // Enhanced table props
+              pagination={true}
+              itemsPerPage={10}
+              showPaginationInfo={true}
+              showItemsPerPageSelector={true}
+              itemsPerPageOptions={[5, 10, 25, 50, 100]}
+              slider={false}
             />
           </div>
         </div>
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="pagination-section mt-4">
-          <div className="d-flex justify-content-between align-items-center">
-            <div className="pagination-info">
-              <span className="text-secondary">
-                Showing {startIndex + 1} to {Math.min(endIndex, filteredTransactions.length)} of {filteredTransactions.length} transactions
-              </span>
-            </div>
-            
-            <div className="pagination-controls">
-              <nav aria-label="Transaction pagination">
-                <ul className="pagination pagination-sm mb-0">
-                  {/* Previous Button */}
-                  <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                    <button
-                      className="page-link bg-dark-custom text-white border-gold"
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
-                    >
-                      Previous
-                    </button>
-                  </li>
-                  
-                  {/* Page Numbers */}
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-                    
-                    return (
-                      <li key={pageNum} className={`page-item ${currentPage === pageNum ? 'active' : ''}`}>
-                        <button
-                          className="page-link bg-dark-custom text-white border-gold"
-                          onClick={() => setCurrentPage(pageNum)}
-                        >
-                          {pageNum}
-                        </button>
-                      </li>
-                    );
-                  })}
-                  
-                  {/* Next Button */}
-                  <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                    <button
-                      className="page-link bg-dark-custom text-white border-gold"
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                    </button>
-                  </li>
-                </ul>
-              </nav>
-            </div>
+      {/* Transactions Table with Slider View */}
+      <div className="mt-4">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h5 className="fw-bold text-white mb-0">All Transactions (Slider View)</h5>
+        </div>
+        
+        <div className="card border-gold card-hover">
+          <div className="card-body p-0">
+            <TransactionTable
+              transactions={filteredTransactions}
+              onSort={handleSort}
+              sortColumn={sortBy}
+              sortDirection={sortOrder}
+              onTransactionClick={(transaction) => {
+                // console.log('Transaction clicked:', transaction);
+              }}
+              // Enhanced table props with slider
+              pagination={false}
+              slider={true}
+              sliderHeight="400px"
+              sliderWidth="100%"
+            />
           </div>
         </div>
-      )}
+      </div>
 
     </div>
   );
