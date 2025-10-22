@@ -1,0 +1,252 @@
+@import '../../../styles/tokens';
+
+// Transaction Table Specific Styles
+.transaction-table {
+  .table-container {
+    .table {
+      // Transaction-specific styling
+      .badge {
+        font-size: $font-size-xs;
+        font-weight: $font-weight-semibold;
+        padding: 0.4rem 0.8rem;
+        border-radius: $border-radius-sm;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        
+        &.bg-primary {
+          background-color: $primary-color !important;
+          color: $text-dark;
+        }
+        
+        &.bg-success {
+          background-color: $success-color !important;
+          color: white;
+        }
+        
+        &.bg-warning {
+          background-color: $warning-color !important;
+          color: $text-dark;
+        }
+        
+        &.bg-info {
+          background-color: $info-color !important;
+          color: white;
+        }
+        
+        &.bg-danger {
+          background-color: $danger-color !important;
+          color: white;
+        }
+        
+        &.bg-secondary {
+          background-color: $text-muted !important;
+          color: white;
+        }
+      }
+      
+      // Status and type icons
+      .text-success {
+        color: $success-color !important;
+      }
+      
+      .text-warning {
+        color: $warning-color !important;
+      }
+      
+      .text-info {
+        color: $info-color !important;
+      }
+      
+      .text-danger {
+        color: $danger-color !important;
+      }
+      
+      .text-gold {
+        color: $primary-color !important;
+      }
+      
+      // Transaction row hover effects
+      tbody tr {
+        cursor: pointer;
+        transition: all $transition-base;
+        
+        &:hover {
+          background-color: rgba($primary-color, 0.05) !important;
+          transform: translateX(4px);
+          box-shadow: 0 2px 8px rgba($primary-color, 0.1);
+        }
+      }
+      
+      // Amount column styling
+      td:has(.text-gold) {
+        text-align: right;
+        font-weight: $font-weight-bold;
+      }
+      
+      // Date column with status icon
+      td:first-child {
+        .d-flex {
+          align-items: center;
+          gap: 0.5rem;
+        }
+      }
+      
+      // Description column
+      td:nth-child(3) {
+        .fw-medium {
+          font-weight: $font-weight-medium;
+        }
+        
+        small {
+          font-size: $font-size-xs;
+          opacity: 0.8;
+        }
+      }
+    }
+  }
+  
+  // Empty state customization
+  .table-empty {
+    .empty-icon {
+      svg {
+        opacity: 0.6;
+      }
+    }
+    
+    .empty-message {
+      font-size: $font-size-base;
+      color: $text-secondary;
+    }
+  }
+}
+
+// Responsive adjustments for transaction table
+@media (max-width: $breakpoint-lg) {
+  .transaction-table {
+    .table-container {
+      .table {
+        font-size: $font-size-sm;
+        
+        .badge {
+          font-size: 0.6rem;
+          padding: 0.2rem 0.4rem;
+        }
+        
+        td {
+          padding: 0.75rem 0.5rem;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .transaction-table {
+    .table-container {
+      .table {
+        font-size: $font-size-xs;
+        
+        .badge {
+          font-size: 0.5rem;
+          padding: 0.1rem 0.3rem;
+        }
+        
+        td {
+          padding: 0.5rem 0.25rem;
+        }
+        
+        // Hide remarks column on medium screens
+        th:nth-child(5),
+        td:nth-child(5) {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .transaction-table {
+    .table-container {
+      .table {
+        font-size: 0.7rem;
+        
+        .badge {
+          font-size: 0.4rem;
+          padding: 0.1rem 0.2rem;
+        }
+        
+        td {
+          padding: 0.4rem 0.1rem;
+        }
+        
+        // Hide status column on small screens
+        th:nth-child(4),
+        td:nth-child(4) {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .transaction-table {
+    .table-container {
+      .table {
+        font-size: 0.6rem;
+        
+        .badge {
+          font-size: 0.3rem;
+          padding: 0.05rem 0.1rem;
+        }
+        
+        td {
+          padding: 0.3rem 0.05rem;
+        }
+      }
+    }
+  }
+}
+
+// Animation for transaction rows
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.transaction-table .table-container .table tbody tr {
+  animation: slideIn 0.3s ease-out;
+}
+
+// Custom hover effects for transaction-specific elements
+.transaction-table {
+  .table-container {
+    .table {
+      tbody tr {
+        position: relative;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 3px;
+          background: transparent;
+          transition: background-color $transition-base;
+        }
+        
+        &:hover::before {
+          background: $primary-color;
+        }
+      }
+    }
+  }
+}
