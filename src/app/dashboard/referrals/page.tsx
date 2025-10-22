@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { getUser } from '@/lib/auth';
 import Button from '@/components/ui/Button';
 import { Copy, Share2, Gift, Users } from 'lucide-react';
-import ReferralsTable, { Referral, ReferralStatus } from '@/components/ui/ReferralsTable';
+import ReferralsTable, { Referral } from '@/components/ui/ReferralsTable';
 import '../dashboard.scss';
 import './referrals.scss';
 
@@ -22,7 +22,7 @@ export default function ReferralsPage() {
   const [copied, setCopied] = useState(false);
   const [sortBy, setSortBy] = useState<'joinDate' | 'totalEarnings' | 'status'>('joinDate');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   useEffect(() => {
     setUser(getUser() as StoredUser | null);
@@ -188,9 +188,9 @@ export default function ReferralsPage() {
     setSortOrder(direction);
   };
 
-  const handleReferralClick = (referral: Referral) => {
+  const handleReferralClick = () => {
     // Handle referral click - could open modal or navigate to detail page
-    // console.log('Referral clicked:', referral);
+    // console.log('Referral clicked');
   };
 
   // Mock stats – replace with API data when available

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 import Table, { TableColumn } from '../Table';
 import './TransactionTable.scss';
 

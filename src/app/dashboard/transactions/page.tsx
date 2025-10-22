@@ -17,7 +17,7 @@ export default function TransactionsPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Sample transaction data
-  const transactions: Transaction[] = [
+  const transactions: Transaction[] = useMemo(() => [
     {
       id: 'TXN-2025-001',
       type: 'deposit',
@@ -96,7 +96,7 @@ export default function TransactionsPage() {
       description: 'Daily profit from Silver Plan',
       date: '2025-01-08T09:00:00Z'
     }
-  ];
+  ], []);
 
   // Filter and sort transactions
   const filteredTransactions = useMemo(() => {
@@ -333,9 +333,9 @@ export default function TransactionsPage() {
               onSort={handleSort}
               sortColumn={sortBy}
               sortDirection={sortOrder}
-              onTransactionClick={(transaction) => {
+              onTransactionClick={() => {
                 // Add transaction detail modal or navigation logic here
-                // console.log('Transaction clicked:', transaction);
+                // console.log('Transaction clicked');
               }}
               // Enhanced table props
               pagination={true}
@@ -362,8 +362,8 @@ export default function TransactionsPage() {
               onSort={handleSort}
               sortColumn={sortBy}
               sortDirection={sortOrder}
-              onTransactionClick={(transaction) => {
-                // console.log('Transaction clicked:', transaction);
+              onTransactionClick={() => {
+                // console.log('Transaction clicked');
               }}
               // Enhanced table props with slider
               pagination={false}
