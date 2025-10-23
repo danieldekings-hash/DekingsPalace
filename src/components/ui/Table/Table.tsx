@@ -104,7 +104,12 @@ export default function Table<T = Record<string, unknown>>({
       return column.render(value, item, index);
     }
     
-    return String(value ?? '');
+    // Ensure we return a valid React node
+    if (value === null || value === undefined) {
+      return <span className="text-muted">-</span>;
+    }
+    
+    return <span>{String(value)}</span>;
   };
 
   if (loading) {

@@ -13,10 +13,10 @@ export default function TransactionsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<TransactionType | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<TransactionStatus | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'date' | 'amount' | 'type'>('date');
+  const [sortBy, setSortBy] = useState<'date' | 'amount' | 'type' | 'status'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  // Sample transaction data
+  // Sample transaction data - properly mapped for table display
   const transactions: Transaction[] = useMemo(() => [
     {
       id: 'TXN-2025-001',
@@ -45,7 +45,8 @@ export default function TransactionsPage() {
       amount: 75,
       currency: 'USDT',
       description: 'Daily profit from Gold Plan',
-      date: '2025-01-13T09:15:00Z'
+      date: '2025-01-13T09:15:00Z',
+      reference: 'PROFIT-001'
     },
     {
       id: 'TXN-2025-004',
@@ -94,7 +95,8 @@ export default function TransactionsPage() {
       amount: 25,
       currency: 'USDT',
       description: 'Daily profit from Silver Plan',
-      date: '2025-01-08T09:00:00Z'
+      date: '2025-01-08T09:00:00Z',
+      reference: 'PROFIT-002'
     }
   ], []);
 
@@ -125,20 +127,28 @@ export default function TransactionsPage() {
         case 'type':
           comparison = a.type.localeCompare(b.type);
           break;
+        case 'status':
+          comparison = a.status.localeCompare(b.status);
+          break;
       }
       
       return sortOrder === 'asc' ? comparison : -comparison;
     });
+
+    // Debug: Log the filtered transactions to see what data is being passed
+    console.log('Filtered transactions:', filtered);
+    console.log('Transaction data structure:', filtered[0]);
 
     return filtered;
   }, [transactions, searchTerm, filterType, filterStatus, sortBy, sortOrder]);
 
 
   const handleSort = (column: string, direction: 'asc' | 'desc') => {
-    const fieldMap: Record<string, 'date' | 'amount' | 'type'> = {
+    const fieldMap: Record<string, 'date' | 'amount' | 'type' | 'status'> = {
       'date': 'date',
       'amount': 'amount',
-      'type': 'type'
+      'type': 'type',
+      'status': 'status'
     };
     
     const field = fieldMap[column];
@@ -330,11 +340,6 @@ export default function TransactionsPage() {
               onTransactionClick={() => {
                 // console.log('Transaction clicked');
               }}
-              // Enhanced table props with slider
-              pagination={false}
-              slider={true}
-              sliderHeight="400px"
-              sliderWidth="100%"
             />
           </div>
         </div>
