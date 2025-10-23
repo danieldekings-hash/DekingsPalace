@@ -312,47 +312,12 @@ export default function TransactionsPage() {
       </div>
 
       {/* Recent Transactions Section */}
-      <div className="recent-transactions-section">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h5 className="fw-bold text-white mb-0">Recent Transactions</h5>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={exportTransactions}
-            className="d-flex align-items-center gap-2"
-          >
-            <Download size={16} />
-            Download Report
-          </Button>
-        </div>
-        
-        <div className="card border-gold card-hover">
-          <div className="card-body p-0">
-            <TransactionTable
-              transactions={transactions}
-              onSort={handleSort}
-              sortColumn={sortBy}
-              sortDirection={sortOrder}
-              onTransactionClick={() => {
-                // Add transaction detail modal or navigation logic here
-                // console.log('Transaction clicked');
-              }}
-              // Enhanced table props
-              pagination={true}
-              itemsPerPage={10}
-              showPaginationInfo={true}
-              showItemsPerPageSelector={true}
-              itemsPerPageOptions={[5, 10, 25, 50, 100]}
-              slider={false}
-            />
-          </div>
-        </div>
-      </div>
+     
 
       {/* Transactions Table with Slider View */}
       <div className="mt-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h5 className="fw-bold text-white mb-0">All Transactions (Slider View)</h5>
+          <h5 className="fw-bold text-white mb-0">Recent Transactions</h5>
         </div>
         
         <div className="card border-gold card-hover">

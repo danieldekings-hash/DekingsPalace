@@ -291,23 +291,7 @@ export default function ReferralsPage() {
       </div>
 
       {/* Referrals Table with Slider */}
-      <div className="card border-gold card-hover mt-4">
-        <div className="card-body">
-          <h5 className="mb-3 text-white">All Referrals (Slider View)</h5>
-          <ReferralsTable
-            referrals={mockReferrals}
-            loading={loading}
-            onSort={handleSort}
-            sortColumn={sortBy}
-            sortDirection={sortOrder}
-            onReferralClick={handleReferralClick}
-            pagination={false}
-            slider={true}
-            sliderHeight="300px"
-            sliderWidth="100%"
-          />
-        </div>
-      </div>
+    
     </div>
   );
 }
