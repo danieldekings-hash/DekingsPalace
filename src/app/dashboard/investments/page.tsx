@@ -285,7 +285,7 @@ export default function InvestmentsPage() {
             <select
               className="form-select bg-dark-custom text-white border-light"
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
+              onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'completed' | 'pending' | 'cancelled')}
             >
               <option value="all">All Investments</option>
               <option value="active">Active</option>
@@ -298,7 +298,7 @@ export default function InvestmentsPage() {
             <select
               className="form-select bg-dark-custom text-white border-light"
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => setSortBy(e.target.value as 'startDate' | 'amount' | 'planName' | 'status')}
             >
               <option value="startDate">Sort by Date</option>
               <option value="amount">Sort by Amount</option>

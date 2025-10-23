@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Check, Star, TrendingUp, Shield, Clock, DollarSign } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import PlanCard from '@/components/shared/PlanCard';
 import '../dashboard.scss';
 import './plans.scss';
 

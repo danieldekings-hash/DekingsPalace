@@ -135,9 +135,6 @@ export default function TransactionsPage() {
       return sortOrder === 'asc' ? comparison : -comparison;
     });
 
-    // Debug: Log the filtered transactions to see what data is being passed
-    console.log('Filtered transactions:', filtered);
-    console.log('Transaction data structure:', filtered[0]);
 
     return filtered;
   }, [transactions, searchTerm, filterType, filterStatus, sortBy, sortOrder]);
