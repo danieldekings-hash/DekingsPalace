@@ -1,0 +1,256 @@
+// Investment Plans Page Styles
+
+.investment-plans-page {
+  .popular-badge {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #000;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+  }
+
+  .selected-plan {
+    border: 2px solid #ffd700 !important;
+    box-shadow: 0 8px 32px rgba(255, 215, 0, 0.2);
+    transform: translateY(-4px);
+    transition: all 0.3s ease;
+  }
+
+  .popular-plan {
+    border: 2px solid #ffd700;
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.15);
+  }
+
+  .plan-icon {
+    .rounded-circle {
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  .investment-calculator {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    
+    .calculation-item {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      
+      &:last-child {
+        border-bottom: none;
+        font-size: 1.1rem;
+        padding-top: 16px;
+      }
+    }
+  }
+
+  .investment-form {
+    .form-control, .form-select {
+      transition: all 0.3s ease;
+      
+      &:focus {
+        border-color: #ffd700;
+        box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25);
+      }
+    }
+  }
+
+  .card-hover {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .stats-overview {
+    .card {
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(255, 215, 0, 0.1);
+      }
+    }
+  }
+
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    .popular-badge {
+      position: relative;
+      top: 0;
+      right: 0;
+      margin-bottom: 16px;
+      align-self: center;
+    }
+    
+    .investment-calculator {
+      margin-top: 24px;
+    }
+  }
+}
+
+// Animation for plan selection
+@keyframes planSelect {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.selected-plan {
+  animation: planSelect 0.3s ease;
+}
+
+// Gradient text for plan names
+.plan-name {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// Investment range styling
+.investment-range {
+  .range-container {
+    position: relative;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .range-header {
+    .range-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .range-percentage {
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      border: 1px solid currentColor;
+    }
+  }
+
+  .range-bar {
+    position: relative;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .range-fill {
+    height: 100%;
+    border-radius: 5px;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: shimmer 2s infinite;
+    }
+  }
+
+  .range-labels {
+    .range-label {
+      .range-amount {
+        font-size: 1.2rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        
+        &:hover {
+          transform: scale(1.05);
+        }
+      }
+      
+      small {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        font-weight: 600;
+        margin-top: 4px;
+        display: block;
+      }
+    }
+    
+    .range-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      margin: 0 16px;
+      
+      .range-divider {
+        width: 2px;
+        height: 30px;
+        background: linear-gradient(180deg, transparent, rgba(255, 215, 0, 0.5), transparent);
+        border-radius: 1px;
+      }
+    }
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+// Features list styling
+.features {
+  .d-flex {
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: translateX(4px);
+    }
+  }
+}
+
+// Calculator highlight
+.calculation-item:last-child {
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}

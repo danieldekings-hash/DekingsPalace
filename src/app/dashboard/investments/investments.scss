@@ -1,0 +1,241 @@
+// Investments Page Styles
+
+.investments-page {
+  .portfolio-stats {
+    .card {
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(255, 215, 0, 0.1);
+      }
+    }
+  }
+
+  .filters-section {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    backdrop-filter: blur(10px);
+  }
+
+  .plan-icon {
+    .rounded-circle {
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      
+      &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      }
+    }
+  }
+
+  .investment-table {
+    .table {
+      background: transparent;
+      color: #ffffff;
+      
+      th {
+        background: rgba(255, 215, 0, 0.1);
+        border-color: rgba(255, 215, 0, 0.3);
+        color: #ffd700;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        padding: 16px 12px;
+      }
+      
+      td {
+        background: transparent;
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        vertical-align: middle;
+        padding: 16px 12px;
+      }
+      
+      .hoverable {
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background: rgba(255, 215, 0, 0.05);
+          transform: scale(1.01);
+        }
+      }
+      
+      // Ensure all text in table cells is white
+      span, div, small {
+        color: inherit;
+      }
+      
+      .text-white {
+        color: #ffffff !important;
+      }
+      
+      .text-secondary {
+        color: #6c757d !important;
+      }
+      
+      .text-success {
+        color: #28a745 !important;
+      }
+      
+      .text-gold {
+        color: #ffd700 !important;
+      }
+    }
+  }
+
+  .status-badges {
+    .badge {
+      font-size: 0.75rem;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .investment-actions {
+    .btn {
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+
+  .investment-summary {
+    .card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      backdrop-filter: blur(10px);
+      
+      .card-body {
+        .d-flex {
+          padding: 8px 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          
+          &:last-child {
+            border-bottom: none;
+          }
+        }
+      }
+    }
+  }
+
+  // Plan tier colors
+  .bronze-plan {
+    color: #CD7F32;
+    border-color: #CD7F32;
+  }
+
+  .silver-plan {
+    color: #C0C0C0;
+    border-color: #C0C0C0;
+  }
+
+  .gold-plan {
+    color: #FFD700;
+    border-color: #FFD700;
+  }
+
+  .platinum-plan {
+    color: #E5E4E2;
+    border-color: #E5E4E2;
+  }
+
+  .diamond-plan {
+    color: #B9F2FF;
+    border-color: #B9F2FF;
+  }
+
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    .filters-section {
+      .row {
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
+    
+    .investment-table {
+      .table {
+        font-size: 0.9rem;
+        
+        th, td {
+          padding: 12px 8px;
+        }
+      }
+    }
+    
+    .portfolio-stats {
+      .row {
+        .col-md-3 {
+          margin-bottom: 16px;
+        }
+      }
+    }
+  }
+
+  // Animation for new investments
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .investment-row {
+    animation: slideInUp 0.5s ease;
+  }
+
+  // Hover effects for plan icons
+  .plan-icon {
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    &:hover::before {
+      opacity: 1;
+    }
+  }
+
+  // Enhanced table styling
+  .table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  // Quick actions styling
+  .quick-actions {
+    .btn {
+      border-radius: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.85rem;
+    }
+  }
+}
