@@ -207,17 +207,17 @@ export default function InvestmentsPage() {
   return (
     <div className="dashboard-page container-custom investments-page">
       {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div className="mb-3 mb-md-0">
           <h1 className="h3 fw-bold text-gold mb-1">My Investments</h1>
           <p className="text-secondary mb-0">Manage and track your investment portfolio</p>
         </div>
-        <div className="d-flex gap-2">
-          <Button variant="outline" size="sm">
+        <div className="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
+          <Button variant="outline" size="sm" className="flex-fill flex-sm-fill-auto">
             <Download size={16} className="me-2" />
             Export
           </Button>
-          <Button variant="primary" size="sm">
+          <Button variant="primary" size="sm" className="flex-fill flex-sm-fill-auto">
             <Plus size={16} className="me-2" />
             New Investment
           </Button>
@@ -225,46 +225,46 @@ export default function InvestmentsPage() {
       </div>
 
       {/* Portfolio Statistics */}
-      <div className="row g-4 mb-4">
-        <div className="col-md-3">
+      <div className="row g-3 g-md-4 mb-4">
+        <div className="col-6 col-md-3">
           <div className="card border-gold card-hover">
             <div className="card-body text-center">
               <TrendingUp size={32} className="text-success mb-2" />
               <h6 className="text-secondary mb-1">Total Invested</h6>
-              <h4 className="fw-bold text-gold mb-0">
+              <h4 className="fw-bold text-gold mb-0" style={{ fontSize: 'clamp(1rem, 4vw, 1.5rem)' }}>
                 {formatAmount(portfolioStats.totalInvested, 'USDT')}
               </h4>
             </div>
           </div>
         </div>
-        <div className="col-md-3">
+        <div className="col-6 col-md-3">
           <div className="card border-gold card-hover">
             <div className="card-body text-center">
               <DollarSign size={32} className="text-primary mb-2" />
               <h6 className="text-secondary mb-1">Total Earnings</h6>
-              <h4 className="fw-bold text-success mb-0">
+              <h4 className="fw-bold text-success mb-0" style={{ fontSize: 'clamp(1rem, 4vw, 1.5rem)' }}>
                 {formatAmount(portfolioStats.totalEarnings, 'USDT')}
               </h4>
             </div>
           </div>
         </div>
-        <div className="col-md-3">
+        <div className="col-6 col-md-3">
           <div className="card border-gold card-hover">
             <div className="card-body text-center">
               <Clock size={32} className="text-info mb-2" />
               <h6 className="text-secondary mb-1">Daily Earnings</h6>
-              <h4 className="fw-bold text-gold mb-0">
+              <h4 className="fw-bold text-gold mb-0" style={{ fontSize: 'clamp(1rem, 4vw, 1.5rem)' }}>
                 {formatAmount(portfolioStats.dailyEarnings, 'USDT')}
               </h4>
             </div>
           </div>
         </div>
-        <div className="col-md-3">
+        <div className="col-6 col-md-3">
           <div className="card border-gold card-hover">
             <div className="card-body text-center">
               <Eye size={32} className="text-warning mb-2" />
               <h6 className="text-secondary mb-1">Active Investments</h6>
-              <h4 className="fw-bold text-gold mb-0">
+              <h4 className="fw-bold text-gold mb-0" style={{ fontSize: 'clamp(1rem, 4vw, 1.5rem)' }}>
                 {portfolioStats.activeCount}/{portfolioStats.totalCount}
               </h4>
             </div>
@@ -318,7 +318,7 @@ export default function InvestmentsPage() {
         </div>
       </div>
 
-      {/* Investments Table */}
+      {/* Desktop Table View */}
       <div className="card border-gold card-hover">
         <div className="card-body p-0">
           <div className="table-responsive investment-table">
@@ -410,6 +410,75 @@ export default function InvestmentsPage() {
             </table>
           </div>
         </div>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="mobile-investments">
+        {filteredInvestments.map((investment) => (
+          <div key={investment.id} className="investment-card">
+            <div className="investment-header">
+              <div className="plan-info">
+                <div 
+                  className="plan-icon"
+                  style={{ 
+                    backgroundColor: `${getPlanColor(investment.planTier)}20`,
+                    border: `2px solid ${getPlanColor(investment.planTier)}`,
+                    color: getPlanColor(investment.planTier)
+                  }}
+                >
+                  {investment.planTier.charAt(0)}
+                </div>
+                <div className="plan-details">
+                  <div className="plan-name">{investment.planName}</div>
+                  <div className="plan-percentage">{investment.planPercentage}% Daily</div>
+                </div>
+              </div>
+              <span className={getStatusBadgeClass(investment.status)}>
+                {investment.status.charAt(0).toUpperCase() + investment.status.slice(1)}
+              </span>
+            </div>
+            
+            <div className="investment-details">
+              <div className="detail-item">
+                <div className="label">Amount</div>
+                <div className="value">{formatAmount(investment.amount, investment.currency)}</div>
+              </div>
+              <div className="detail-item">
+                <div className="label">Daily Return</div>
+                <div className="value text-success">{formatAmount(investment.dailyReturn, investment.currency)}</div>
+              </div>
+              <div className="detail-item">
+                <div className="label">Total Earnings</div>
+                <div className="value text-gold">{formatAmount(investment.totalEarnings, investment.currency)}</div>
+              </div>
+              <div className="detail-item">
+                <div className="label">Days Remaining</div>
+                <div className="value">{investment.daysRemaining} days</div>
+              </div>
+              <div className="detail-item">
+                <div className="label">Next Payout</div>
+                <div className="value text-secondary">{formatDate(investment.nextPayout)}</div>
+              </div>
+              <div className="detail-item">
+                <div className="label">Expected Return</div>
+                <div className="value text-gold">{formatAmount(investment.expectedReturn, investment.currency)}</div>
+              </div>
+            </div>
+            
+            <div className="investment-actions">
+              <Button variant="outline" size="sm" className="flex-fill">
+                <Eye size={14} className="me-1" />
+                View
+              </Button>
+              {investment.status === 'active' && (
+                <Button variant="outline" size="sm" className="flex-fill text-warning">
+                  <Clock size={14} className="me-1" />
+                  Pause
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Investment Summary */}
