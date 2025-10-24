@@ -155,22 +155,17 @@
     border-color: #B9F2FF;
   }
 
-  // Responsive adjustments
+  // Mobile responsive adjustments
   @media (max-width: 768px) {
     .filters-section {
       .row {
         flex-direction: column;
         gap: 16px;
       }
-    }
-    
-    .investment-table {
-      .table {
-        font-size: 0.9rem;
-        
-        th, td {
-          padding: 12px 8px;
-        }
+      
+      .col-md-4, .col-md-3, .col-md-2 {
+        width: 100%;
+        margin-bottom: 12px;
       }
     }
     
@@ -178,6 +173,165 @@
       .row {
         .col-md-3 {
           margin-bottom: 16px;
+        }
+      }
+    }
+    
+    // Hide table on mobile and show card layout instead
+    .investment-table {
+      display: none;
+    }
+    
+    // Mobile card layout for investments
+    .mobile-investments {
+      display: block;
+      
+      .investment-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(255, 215, 0, 0.1);
+        }
+        
+        .investment-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 12px;
+          
+          .plan-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            
+            .plan-icon {
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: bold;
+              font-size: 1.1rem;
+            }
+            
+            .plan-details {
+              .plan-name {
+                color: #ffffff;
+                font-weight: 600;
+                margin-bottom: 2px;
+              }
+              
+              .plan-percentage {
+                color: #6c757d;
+                font-size: 0.85rem;
+              }
+            }
+          }
+          
+          .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+          }
+        }
+        
+        .investment-details {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          margin-bottom: 12px;
+          
+          .detail-item {
+            .label {
+              color: #6c757d;
+              font-size: 0.8rem;
+              margin-bottom: 4px;
+            }
+            
+            .value {
+              color: #ffffff;
+              font-weight: 600;
+              font-size: 0.9rem;
+            }
+          }
+        }
+        
+        .investment-actions {
+          display: flex;
+          gap: 8px;
+          
+          .btn {
+            flex: 1;
+            font-size: 0.8rem;
+            padding: 6px 12px;
+          }
+        }
+      }
+    }
+  }
+  
+  // Show table on desktop, hide mobile cards
+  @media (min-width: 769px) {
+    .mobile-investments {
+      display: none;
+    }
+    
+    .investment-table {
+      display: block;
+    }
+  }
+  
+  // Additional mobile improvements
+  @media (max-width: 576px) {
+    .container-custom {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+    
+    .card-body {
+      padding: 12px;
+    }
+    
+    .btn {
+      font-size: 0.8rem;
+      padding: 6px 12px;
+    }
+    
+    .filters-section {
+      padding: 12px;
+      
+      .form-select, .form-control {
+        font-size: 0.9rem;
+      }
+    }
+    
+    .mobile-investments {
+      .investment-card {
+        padding: 12px;
+        
+        .investment-details {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+        
+        .investment-actions {
+          flex-direction: column;
+          gap: 6px;
+          
+          .btn {
+            font-size: 0.75rem;
+            padding: 8px 12px;
+          }
         }
       }
     }
