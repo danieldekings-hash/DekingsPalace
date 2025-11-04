@@ -252,7 +252,7 @@ export default function InvestmentsPage() {
           <div className="card border-gold card-hover">
             <div className="card-body text-center">
               <Clock size={32} className="text-info mb-2" />
-              <h6 className="text-secondary mb-1">Daily Earnings</h6>
+              <h6 className="text-secondary mb-1">Monthly Earnings</h6>
               <h4 className="fw-bold text-gold mb-0" style={{ fontSize: 'clamp(1rem, 4vw, 1.5rem)' }}>
                 {formatAmount(portfolioStats.dailyEarnings, 'USDT')}
               </h4>
@@ -328,7 +328,7 @@ export default function InvestmentsPage() {
                   <th>Plan</th>
                   <th>Amount</th>
                   <th>Status</th>
-                  <th>Daily Return</th>
+                  <th>Monthly Return</th>
                   <th>Total Earnings</th>
                   <th>Days Remaining</th>
                   <th>Next Payout</th>
@@ -358,7 +358,7 @@ export default function InvestmentsPage() {
                         </div>
                         <div>
                           <div className="fw-medium text-white">{investment.planName}</div>
-                          <small className="text-secondary">{investment.planPercentage}% Daily</small>
+                          <small className="text-secondary">{investment.planPercentage}% Monthly</small>
                         </div>
                       </div>
                     </td>
@@ -430,7 +430,7 @@ export default function InvestmentsPage() {
                 </div>
                 <div className="plan-details">
                   <div className="plan-name">{investment.planName}</div>
-                  <div className="plan-percentage">{investment.planPercentage}% Daily</div>
+                  <div className="plan-percentage">{investment.planPercentage}% Monthly</div>
                 </div>
               </div>
               <span className={getStatusBadgeClass(investment.status)}>
@@ -444,7 +444,7 @@ export default function InvestmentsPage() {
                 <div className="value">{formatAmount(investment.amount, investment.currency)}</div>
               </div>
               <div className="detail-item">
-                <div className="label">Daily Return</div>
+                <div className="label">Monthly Return</div>
                 <div className="value text-success">{formatAmount(investment.dailyReturn, investment.currency)}</div>
               </div>
               <div className="detail-item">
