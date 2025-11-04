@@ -6,6 +6,7 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import api from '@/lib/api';
 import { setToken } from '@/lib/auth';
+import { User } from '@/types/global';
 
 export default function AdminLoginPage() {
   const router = useRouter();

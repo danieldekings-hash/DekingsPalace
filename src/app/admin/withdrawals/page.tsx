@@ -1,8 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Button from '@/components/ui/Button';
-import { Check, X, Filter } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import Table, { TableColumn } from '@/components/ui/Table/Table';
 import { useRouter } from 'next/navigation';
 
@@ -43,10 +42,6 @@ export default function AdminWithdrawalsPage() {
   const formatAmount = (amount: number, currency: string) => `${amount.toLocaleString()} ${currency}`;
   const formatDate = (date: string) => new Date(date).toLocaleString('en-US');
 
-  const updateStatus = (id: string, status: WithdrawalStatus) => {
-    setRows(prev => prev.map(r => r.id === id ? { ...r, status } : r));
-  };
-
   return (
     <div>
       <h1 className="h4 fw-bold text-gold mb-3">Withdrawals</h1>
@@ -84,22 +79,9 @@ export default function AdminWithdrawalsPage() {
               { key: 'email', label: 'Email', sortable: true, render: (v) => <span className="text-secondary">{v as string}</span> },
               { key: 'amount', label: 'Amount', sortable: true, render: (_v, item) => <span className="text-gold fw-bold">{formatAmount(item.amount, item.currency)}</span> },
               { key: 'method', label: 'Method', sortable: true, render: (v) => <span className="text-white">{v as string}</span> },
-              { key: 'address', label: 'Address', render: (v) => <span className="text-white">{v as string}</span> },
+              { key: 'address', label: 'Address', render: (v) => <span className="text-white fw-bold">{v as string}</span> },
               { key: 'status', label: 'Status', sortable: true, render: (v) => <span className={`badge ${v === 'paid' ? 'bg-success' : v === 'approved' ? 'bg-primary' : v === 'pending' ? 'bg-warning' : 'bg-danger'}`}>{v as string}</span> },
-              { key: 'requestedAt', label: 'Requested', sortable: true, render: (v) => <span className="text-white">{formatDate(v as string)}</span> },
-              { key: 'actions', label: 'Actions', render: (_v, r) => (
-                <div className="d-flex gap-1">
-                  {r.status === 'pending' && (
-                    <Button variant="outline" size="sm" className="text-primary" onClick={() => updateStatus(r.id, 'approved')}><Check size={14} className="me-1" />Approve</Button>
-                  )}
-                  {r.status === 'approved' && (
-                    <Button variant="outline" size="sm" className="text-success" onClick={() => updateStatus(r.id, 'paid')}><Check size={14} className="me-1" />Mark Paid</Button>
-                  )}
-                  {r.status === 'pending' && (
-                    <Button variant="outline" size="sm" className="text-danger" onClick={() => updateStatus(r.id, 'rejected')}><X size={14} className="me-1" />Reject</Button>
-                  )}
-                </div>
-              ) }
+              { key: 'requestedAt', label: 'Requested', sortable: true, render: (v) => <span className="text-white">{formatDate(v as string)}</span> }
             ] as TableColumn<WithdrawalRow>[])}
             pagination
             itemsPerPage={10}
