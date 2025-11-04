@@ -25,7 +25,7 @@ export default function AdminWithdrawalsPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | WithdrawalStatus>('all');
   const [query, setQuery] = useState('');
 
-  const [rows, setRows] = useState<WithdrawalRow[]>([{
+  const [rows] = useState<WithdrawalRow[]>([{
     id: 'WD-001', userId: 'U-001', name: 'Alice Smith', email: 'alice@example.com', amount: 120, currency: 'USDT', method: 'USDT-TRC20', address: 'TR123...89', status: 'pending', requestedAt: '2025-01-13T10:00:00Z'
   }, {
     id: 'WD-002', userId: 'U-003', name: 'Carol Lee', email: 'carol@example.com', amount: 560, currency: 'USDT', method: 'USDT-ERC20', address: '0xabc...def', status: 'approved', requestedAt: '2025-01-12T16:20:00Z'
@@ -54,7 +54,7 @@ export default function AdminWithdrawalsPage() {
               <span className="text-white fw-medium">Filter by Status:</span>
             </div>
             <div className="col-md-3">
-              <select className="form-select bg-dark-custom text-white border-light" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)}>
+              <select className="form-select bg-dark-custom text-white border-light" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as 'all' | WithdrawalStatus)}>
                 <option value="all">All</option>
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>

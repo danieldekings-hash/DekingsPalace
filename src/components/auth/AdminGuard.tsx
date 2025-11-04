@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getToken, getUser } from '@/lib/auth';
+import { User } from '@/types/global';
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();

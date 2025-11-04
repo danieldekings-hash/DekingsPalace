@@ -53,7 +53,7 @@ export default function AdminInvestorsPage() {
               </div>
             </div>
             <div className="col-md-3">
-              <select className="form-select bg-dark-custom text-white border-light" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)}>
+              <select className="form-select bg-dark-custom text-white border-light" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'suspended')}>
                 <option value="all">All</option>
                 <option value="active">Active</option>
                 <option value="suspended">Suspended</option>

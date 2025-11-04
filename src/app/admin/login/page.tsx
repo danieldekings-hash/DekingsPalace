@@ -20,12 +20,12 @@ export default function AdminLoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const res = await api.login({ email: formData.email, password: formData.password } as any);
-      const user = (res as any).user as User;
+      const res = await api.login({ email: formData.email, password: formData.password });
+      const user = res.user as User | undefined;
       if (!user || user.role !== 'admin') {
         throw new Error('Admin access required');
       }
-      setToken((res as any).token, true, user);
+      setToken(res.token, true, user);
       router.replace('/admin');
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Login failed';
