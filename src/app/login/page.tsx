@@ -27,10 +27,13 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const res = await api.login({ email: formData.email, password: formData.password });
-      // store token
+      // store token and route by role
       setToken(res.token, !!formData.rememberMe, res.user);
-      // redirect to dashboard
-      router.push('/dashboard');
+      if ((res.user as any)?.role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err: unknown) {
       // normalize unknown error without using `any`
       console.error('Login error', err);

@@ -34,7 +34,7 @@ export default function PlansPage() {
       color: '#CD7F32',
       description: 'Perfect for beginners looking to start their investment journey',
       features: [
-        '5% Daily Returns',
+        '5% Monthly Returns',
         'Minimum $20 Investment',
         'Maximum $50 Investment',
         '24/7 Support',
@@ -51,7 +51,7 @@ export default function PlansPage() {
       color: '#C0C0C0',
       description: 'Ideal for moderate investors seeking steady growth',
       features: [
-        '8% Daily Returns',
+        '8% Monthly Returns',
         'Minimum $51 Investment',
         'Maximum $100 Investment',
         'Priority Support',
@@ -69,7 +69,7 @@ export default function PlansPage() {
       color: '#FFD700',
       description: 'Premium plan for serious investors',
       features: [
-        '10% Daily Returns',
+        '10% Monthly Returns',
         'Minimum $101 Investment',
         'Maximum $500 Investment',
         'VIP Support',
@@ -89,7 +89,7 @@ export default function PlansPage() {
       color: '#E5E4E2',
       description: 'Elite plan for high-value investors',
       features: [
-        '15% Daily Returns',
+        '15% Monthly Returns',
         'Minimum $501 Investment',
         'Maximum $5000 Investment',
         'Dedicated Support Team',
@@ -108,7 +108,7 @@ export default function PlansPage() {
       color: '#B9F2FF',
       description: 'Ultimate plan for maximum returns',
       features: [
-        '20% Daily Returns',
+        '20% Monthly Returns',
         'Minimum $5001 Investment',
         'No Maximum Limit',
         'White-glove Service',
@@ -140,7 +140,7 @@ export default function PlansPage() {
       <div className="text-center mb-5">
         <h1 className="display-6 fw-bold text-gradient mb-3">Investment Plans</h1>
         <p className="text-secondary fs-5">
-          Choose your investment tier and start earning daily returns
+          Choose your investment tier and start earning monthly returns
         </p>
       </div>
 
@@ -151,7 +151,7 @@ export default function PlansPage() {
             <div className="card-body">
               <TrendingUp size={32} className="text-success mb-2" />
               <h4 className="fw-bold text-gold mb-1">5-20%</h4>
-              <p className="text-secondary mb-0">Daily Returns</p>
+              <p className="text-secondary mb-0">Monthly Returns</p>
             </div>
           </div>
         </div>
@@ -227,7 +227,7 @@ export default function PlansPage() {
                   <div className="display-6 fw-bold text-gold mb-1">
                     {plan.percentage}%
                   </div>
-                  <p className="text-secondary mb-0">Daily Returns</p>
+                  <p className="text-secondary mb-0">Monthly Returns</p>
                 </div>
 
                 <div className="investment-range mb-4">
@@ -235,7 +235,7 @@ export default function PlansPage() {
                     <div className="range-header d-flex justify-content-between align-items-center mb-3">
                       <span className="range-title text-white fw-medium">Investment Range</span>
                       <div className="range-percentage" style={{ color: plan.color }}>
-                        {plan.percentage}% Daily
+                        {plan.percentage}% Monthly
                       </div>
                     </div>
                     
@@ -364,30 +364,25 @@ export default function PlansPage() {
                   </div>
                   
                   <div className="calculation-item d-flex justify-content-between mb-2">
-                    <span className="text-secondary">Daily Return Rate:</span>
+                    <span className="text-secondary">Monthly Return Rate:</span>
                     <span className="text-gold">{selectedPlanData.percentage}%</span>
-                  </div>
-                  
-                  <div className="calculation-item d-flex justify-content-between mb-2">
-                    <span className="text-secondary">Daily Earnings:</span>
-                    <span className="text-success fw-bold">
-                      ${calculateReturns(investmentAmount, selectedPlanData.percentage).toFixed(2)}
-                    </span>
                   </div>
                   
                   <div className="calculation-item d-flex justify-content-between mb-2">
                     <span className="text-secondary">Monthly Earnings:</span>
                     <span className="text-success fw-bold">
-                      ${(calculateReturns(investmentAmount, selectedPlanData.percentage) * 30).toFixed(2)}
+                      ${(calculateReturns(investmentAmount, selectedPlanData.percentage)).toFixed(2)}
                     </span>
                   </div>
+                  
+                  
                   
                   <hr className="border-light my-3" />
                   
                   <div className="calculation-item d-flex justify-content-between">
                     <span className="text-white fw-bold">Total Return (30 days):</span>
                     <span className="text-gold fw-bold fs-5">
-                      ${(investmentAmount + (calculateReturns(investmentAmount, selectedPlanData.percentage) * 30)).toFixed(2)}
+                      ${(investmentAmount + (calculateReturns(investmentAmount, selectedPlanData.percentage))).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -410,7 +405,7 @@ export default function PlansPage() {
                 </li>
                 <li className="mb-2">
                   <Check size={16} className="text-success me-2" />
-                  <span className="text-secondary">Returns are calculated daily</span>
+                  <span className="text-secondary">Returns are calculated monthly</span>
                 </li>
                 <li className="mb-2">
                   <Check size={16} className="text-success me-2" />
