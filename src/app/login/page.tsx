@@ -6,11 +6,12 @@ import { useRouter } from 'next/navigation';
 import { Crown, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import { ToastProvider, useToast } from '@/components/ui/Toast/ToastContainer';
 import './login.scss';
 import api from '@/lib/api';
 import { setToken } from '@/lib/auth';
 
-export default function LoginPage() {
+function LoginPageContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -20,6 +21,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,10 +32,15 @@ export default function LoginPage() {
       // store token and route by role
       const user = res.user as { role?: 'user' | 'admin' } | undefined;
       setToken(res.token, !!formData.rememberMe, res.user);
+      
+      setLoading(false);
+      
       if (user?.role === 'admin') {
-        router.push('/admin');
+        showToast('Admin Login Successful! Redirecting...', 'success', 3000);
+        setTimeout(() => router.push('/admin'), 2000);
       } else {
-        router.push('/dashboard');
+        showToast('Login Successful! Redirecting...', 'success', 3000);
+        setTimeout(() => router.push('/dashboard'), 2000);
       }
     } catch (err: unknown) {
       // normalize unknown error without using `any`
@@ -186,5 +193,13 @@ export default function LoginPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <ToastProvider>
+      <LoginPageContent />
+    </ToastProvider>
   );
 }

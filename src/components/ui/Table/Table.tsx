@@ -189,8 +189,7 @@ export default function Table<T = Record<string, unknown>>({
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        <div style={{ minWidth: '900px' }}>
-          <table className={`table table-custom ${striped ? 'table-striped' : ''} ${bordered ? 'table-bordered' : ''}`}>
+        <table className={`table table-custom ${striped ? 'table-striped' : ''} ${bordered ? 'table-bordered' : ''}`}>
             <thead>
               <tr>
                 {columns.map((column) => (
@@ -222,7 +221,6 @@ export default function Table<T = Record<string, unknown>>({
               ))}
             </tbody>
           </table>
-        </div>
       </div>
 
       {renderPaginationControls()}

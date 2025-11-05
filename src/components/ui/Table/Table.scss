@@ -4,9 +4,10 @@
 .table-container {
   border-radius: $border-radius;
   // Allow inner responsive/slider wrappers to display their own scrollbars
-  overflow: visible;
+  overflow: hidden;
   box-shadow: $shadow-sm;
   background-color: $bg-card;
+  width: 100%;
   
   .table {
     margin-bottom: 0;
@@ -202,6 +203,84 @@
     
     &:hover {
       background: darken($primary-color, 10%);
+    }
+  }
+}
+
+// Table Slider Wrapper Styles
+.table-slider-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin; // For Firefox
+  scrollbar-color: $primary-color $bg-secondary; // For Firefox
+  position: relative;
+  
+  // Add shadow to indicate scrollable content
+  background: 
+    linear-gradient(90deg, $bg-card 30%, rgba($bg-card, 0)),
+    linear-gradient(90deg, rgba($bg-card, 0), $bg-card 70%) 100% 0,
+    radial-gradient(farthest-side at 0 50%, rgba(0,0,0,.2), rgba(0,0,0,0)),
+    radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.2), rgba(0,0,0,0)) 100% 0;
+  background-repeat: no-repeat;
+  background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-attachment: local, local, scroll, scroll;
+  
+  // Desktop scrollbar
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: $bg-secondary;
+    border-radius: $border-radius;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: $primary-color;
+    border-radius: $border-radius;
+    
+    &:hover {
+      background: darken($primary-color, 10%);
+    }
+  }
+  
+  .table {
+    margin-bottom: 0;
+    width: 100%;
+    min-width: 600px; // Minimum width for proper table display
+    
+    th, td {
+      white-space: nowrap; // Prevent text wrapping in cells
+    }
+  }
+}
+
+// Mobile-specific scrollbar styles
+@media (max-width: $breakpoint-md) {
+  .table-slider-wrapper {
+    // Make scrollbar more visible on mobile
+    &::-webkit-scrollbar {
+      height: 12px;
+      -webkit-appearance: none;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: rgba($bg-secondary, 0.8);
+      border-radius: 6px;
+      margin: 0 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: $primary-color;
+      border-radius: 6px;
+      border: 2px solid $bg-card;
+      
+      &:active {
+        background: lighten($primary-color, 10%);
+      }
     }
   }
 }
