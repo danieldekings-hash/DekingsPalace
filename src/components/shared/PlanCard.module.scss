@@ -1,23 +1,26 @@
 @import '../../styles/tokens';
 
 .planCard {
-  background: white;
+  background: $bg-card;
+  border: 1px solid $primary-color;
   border-radius: $border-radius-lg;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   height: 100%;
+  cursor: pointer;
 
   &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba($primary-color, 0.3);
+    border-color: lighten($primary-color, 10%);
   }
 
   &__header {
-    padding: 1.5rem;
-    background: linear-gradient(135deg, $primary-color, darken($primary-color, 10%));
+    padding: 2rem 1.5rem 1rem;
+    text-align: center;
     color: white;
   }
 
@@ -25,11 +28,12 @@
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
+    color: $text-primary;
   }
 
   &__description {
     font-size: 0.9rem;
-    opacity: 0.95;
+    color: $text-secondary;
     margin-bottom: 0;
   }
 
@@ -43,7 +47,8 @@
   &__roi {
     text-align: center;
     padding: 1.5rem;
-    background: lighten($primary-color, 45%);
+    background: rgba($primary-color, 0.1);
+    border: 1px solid rgba($primary-color, 0.3);
     border-radius: $border-radius;
     margin-bottom: 1.5rem;
   }
@@ -71,7 +76,7 @@
     gap: 1rem;
     margin-bottom: 1.5rem;
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid $border-color;
+    border-bottom: 1px solid rgba($primary-color, 0.2);
   }
 
   &__detail {
@@ -88,7 +93,7 @@
   &__detailValue {
     font-size: 1rem;
     font-weight: 600;
-    color: $text-primary;
+    color: $primary-color;
   }
 
   &__features {
@@ -114,7 +119,7 @@
     gap: 0.5rem;
     padding: 0.5rem 0;
     font-size: 0.875rem;
-    color: $text-secondary;
+    color: $text-primary;
   }
 
   &__featureIcon {
@@ -136,3 +141,4 @@
     margin-top: auto;
   }
 }
+

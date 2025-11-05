@@ -1,5 +1,12 @@
 @import './tokens';
 
+// Global overflow prevention
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+  position: relative;
+}
+
 // Utility Classes
 .sidebar-nav {
   font-size: 1rem; // increase sidebar font size
@@ -19,6 +26,61 @@
 }
 
 // Card Styles
+.card {
+  overflow: hidden; // Prevent card content overflow
+  max-width: 100%;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  box-sizing: border-box;
+  
+  .card-body {
+    overflow: hidden; // Ensure content stays within card
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    
+    // Ensure all child elements don't overflow
+    > * {
+      max-width: 100%;
+    }
+    
+    // Prevent long text from breaking layout
+    h1, h2, h3, h4, h5, h6, p, span, div {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      max-width: 100%;
+    }
+    
+    // Fix buttons
+    .btn, button {
+      max-width: 100%;
+      white-space: normal;
+      word-wrap: break-word;
+    }
+    
+    // Fix flex containers
+    .d-flex {
+      flex-wrap: wrap;
+      max-width: 100%;
+    }
+  }
+  
+  .card-header {
+    overflow: hidden;
+    max-width: 100%;
+    word-wrap: break-word;
+  }
+  
+  .card-footer {
+    overflow: hidden;
+    max-width: 100%;
+    word-wrap: break-word;
+  }
+}
+
 .card-hover {
   transition: all $transition-base;
   
@@ -125,10 +187,67 @@
 }
 
 // Table Styles
+.table-responsive {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: $primary-color $bg-secondary;
+  
+  // Desktop scrollbar
+  &::-webkit-scrollbar {
+    height: 10px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: $bg-secondary;
+    border-radius: $border-radius;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: $primary-color;
+    border-radius: $border-radius;
+    
+    &:hover {
+      background: darken($primary-color, 10%);
+    }
+  }
+}
+
+// Mobile-specific scrollbar for tables
+@media (max-width: $breakpoint-md) {
+  .table-responsive {
+    &::-webkit-scrollbar {
+      height: 14px;
+      -webkit-appearance: none;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: rgba($bg-secondary, 0.8);
+      border-radius: 6px;
+      margin: 0 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: $primary-color;
+      border-radius: 6px;
+      border: 2px solid $bg-card;
+      
+      &:active {
+        background: lighten($primary-color, 10%);
+      }
+    }
+  }
+}
+
 .table-custom {
   border-radius: $border-radius;
   overflow: hidden;
   box-shadow: $shadow-sm;
+  width: 100%;
+  min-width: 600px; // Minimum width for proper display
   
   thead {
     background-color: $bg-secondary;
@@ -139,6 +258,7 @@
       font-size: $font-size-sm;
       letter-spacing: 0.5px;
       padding: 1rem;
+      white-space: nowrap;
     }
   }
   
@@ -153,6 +273,7 @@
       td {
         padding: 1rem;
         vertical-align: middle;
+        white-space: nowrap;
       }
     }
   }
@@ -160,6 +281,33 @@
 
 // Responsive utilities
 @media (max-width: $breakpoint-md) {
+  // Prevent overflow on mobile
+  .container, .container-fluid, .container-custom {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100%;
+  }
+  
+  [class*="col-"] {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    max-width: 100%;
+  }
+  
+  // Ensure all cards fit on mobile
+  .card {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+  }
+  
   .hero-section {
     min-height: 400px;
     padding: 2rem 0;
@@ -171,5 +319,39 @@
   
   .display-5 {
     font-size: 1.75rem;
+  }
+}
+
+// Extra small devices
+@media (max-width: $breakpoint-sm) {
+  .container, .container-fluid, .container-custom {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    box-sizing: border-box;
+  }
+  
+  [class*="col-"] {
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+    box-sizing: border-box;
+  }
+  
+  // Reduce card padding on small screens
+  .card {
+    .card-body {
+      padding: 0.75rem !important;
+      
+      // Make headings smaller on mobile
+      h1 { font-size: clamp(1.25rem, 5vw, 2rem); }
+      h2 { font-size: clamp(1.1rem, 4.5vw, 1.75rem); }
+      h3 { font-size: clamp(1rem, 4vw, 1.5rem); }
+      h4 { font-size: clamp(0.95rem, 3.5vw, 1.25rem); }
+      h5 { font-size: clamp(0.9rem, 3vw, 1.1rem); }
+      h6 { font-size: clamp(0.85rem, 2.5vw, 1rem); }
+    }
+    
+    .card-header, .card-footer {
+      padding: 0.5rem 0.75rem;
+    }
   }
 }
