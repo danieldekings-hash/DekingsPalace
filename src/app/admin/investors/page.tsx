@@ -67,7 +67,7 @@ export default function AdminInvestorsPage() {
       </div>
 
       <div className="card border-gold">
-        <div className="card-body">
+        <div className="card-body p-0">
           <Table<InvestorRow>
             data={filtered}
             columns={([

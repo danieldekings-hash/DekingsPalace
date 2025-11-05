@@ -28,6 +28,8 @@ export interface TableProps<T = Record<string, unknown>> {
   hoverable?: boolean;
   striped?: boolean;
   bordered?: boolean;
+  // Responsive wrapper
+  responsive?: boolean;
   // Pagination props
   pagination?: boolean;
   itemsPerPage?: number;
@@ -55,6 +57,8 @@ export default function Table<T = Record<string, unknown>>({
   hoverable = true,
   striped = false,
   bordered = true,
+  // Responsive wrapper
+  responsive = true,
   // Pagination props
   pagination = false,
   itemsPerPage = 10,
@@ -295,7 +299,7 @@ export default function Table<T = Record<string, unknown>>({
     <div className={`table-container ${className}`}>
       {slider ? (
         <div 
-          className="table-slider"
+          className={`table-slider ${responsive ? 'table-responsive' : ''}`}
           style={{ 
             height: sliderHeight, 
             width: sliderWidth,
@@ -306,7 +310,13 @@ export default function Table<T = Record<string, unknown>>({
           {tableContent}
         </div>
       ) : (
-        tableContent
+        responsive ? (
+          <div className="table-responsive">
+            {tableContent}
+          </div>
+        ) : (
+          tableContent
+        )
       )}
       {renderPaginationControls()}
     </div>

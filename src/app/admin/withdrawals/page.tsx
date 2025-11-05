@@ -75,7 +75,7 @@ export default function AdminWithdrawalsPage() {
       </div>
 
       <div className="card border-gold card-hover">
-        <div className="card-body">
+        <div className="card-body p-0">
           <Table<WithdrawalRow>
             data={filtered}
             columns={([

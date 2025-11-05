@@ -2,12 +2,19 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Crown } from 'lucide-react';
 import './Header.scss';
 import MobileSidebar from './MobileSidebar';
+import { menuItems } from './Sidebar';
+import { adminMenuItems } from '@/components/admin/AdminSidebar';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isAdminRoute = pathname.startsWith('/admin');
+  const mobileMenu = isAdminRoute ? adminMenuItems : menuItems;
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark site-header site-header--gold">
@@ -63,7 +70,7 @@ export default function Navbar() {
         </div>
       </div>
       {/* Mobile Drawer */}
-      <MobileSidebar isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <MobileSidebar isOpen={isOpen} onClose={() => setIsOpen(false)} items={mobileMenu} />
     </nav>
   );
 }
