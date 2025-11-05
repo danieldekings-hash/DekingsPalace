@@ -29,7 +29,7 @@ function LoginPageContent() {
     setLoading(true);
     try {
       const res = await api.login({ email: formData.email, password: formData.password });
-      // store token and route by role
+      
       const user = res.user as { role?: 'user' | 'admin' } | undefined;
       setToken(res.token, !!formData.rememberMe, res.user);
       
@@ -43,7 +43,7 @@ function LoginPageContent() {
         setTimeout(() => router.push('/dashboard'), 2000);
       }
     } catch (err: unknown) {
-      // normalize unknown error without using `any`
+    
       console.error('Login error', err);
       const getErrorMessage = (e: unknown) => {
         if (e instanceof Error) return e.message;

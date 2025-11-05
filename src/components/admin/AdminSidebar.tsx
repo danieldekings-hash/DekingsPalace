@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, LogOut, DollarSign, Gift, Wallet } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { clearToken } from '@/lib/auth';
+import { clearToken, getToken } from '@/lib/auth';
+import { logout } from '@/lib/api';
 import '@/styles/components.scss';
 
 export const adminMenuItems = [
@@ -20,9 +21,18 @@ export default function AdminSidebar() {
 
   const isActive = (href: string) => pathname === href;
 
-  const handleLogout = () => {
-    clearToken();
-    window.location.href = '/login';
+  const handleLogout = async () => {
+    try {
+      const token = getToken();
+      if (token) {
+        await logout(token);
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      clearToken();
+      window.location.href = '/login';
+    }
   };
 
   return (
