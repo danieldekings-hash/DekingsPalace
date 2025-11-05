@@ -3,14 +3,16 @@
 import Link from 'next/link';
 import '@/styles/components.scss';
 import { usePathname } from 'next/navigation';
-import { menuItems } from './Sidebar';
+
+type MenuItem = { href: string; label: string; icon: React.ReactNode };
 
 type MobileSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
+  items: MenuItem[];
 };
 
-export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
+export default function MobileSidebar({ isOpen, onClose, items }: MobileSidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -41,7 +43,7 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
       >
         <nav className="py-3 sidebar-nav">
           <ul className="list-unstyled">
-            {menuItems.map((item) => {
+            {items.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <li key={item.href}>

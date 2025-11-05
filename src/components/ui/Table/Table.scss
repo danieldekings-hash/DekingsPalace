@@ -3,7 +3,8 @@
 // Generic Table Component Styles
 .table-container {
   border-radius: $border-radius;
-  overflow: hidden;
+  // Allow inner responsive/slider wrappers to display their own scrollbars
+  overflow: visible;
   box-shadow: $shadow-sm;
   background-color: $bg-card;
   

@@ -50,7 +50,7 @@ export default function AdminReferralsPage() {
       </div>
 
       <div className="card border-gold card-hover">
-        <div className="card-body">
+        <div className="card-body p-0">
           <Table<ReferralRow>
             data={filtered}
             columns={([
