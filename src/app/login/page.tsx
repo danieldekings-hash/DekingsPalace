@@ -28,8 +28,9 @@ export default function LoginPage() {
     try {
       const res = await api.login({ email: formData.email, password: formData.password });
       // store token and route by role
+      const user = res.user as { role?: 'user' | 'admin' } | undefined;
       setToken(res.token, !!formData.rememberMe, res.user);
-      if ((res.user as any)?.role === 'admin') {
+      if (user?.role === 'admin') {
         router.push('/admin');
       } else {
         router.push('/dashboard');
