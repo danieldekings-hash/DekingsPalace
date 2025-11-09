@@ -27,7 +27,7 @@ export default function HomePage() {
                   Start building your financial freedom today with our proven investment strategies.
                 </p>
                 <div className="hero-cta d-flex flex-wrap gap-3">
-                  <Link href="/dashboard" className="btn btn-gold btn-lg">
+                  <Link href="/register" className="btn btn-gold btn-lg">
                     Get Started Now
                   </Link>
                   <Link href="#how-it-works" className="btn btn-outline-gold btn-lg">

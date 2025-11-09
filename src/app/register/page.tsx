@@ -8,7 +8,6 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import './register.scss';
 import api from '@/lib/api';
-import { setToken } from '@/lib/auth';
 
 function PrefillReferral({ onPrefill }: { onPrefill: (ref: string) => void }) {
   const searchParams = useSearchParams();
@@ -52,7 +51,7 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const res = await api.register({
+      await api.register({
         fullName: formData.fullName,
         email: formData.email,
         phoneNumber: formData.phone,
@@ -61,8 +60,8 @@ export default function RegisterPage() {
         referralCode: formData.referralCode || undefined,
         role: 'investor',
       });
-      setToken(res.token, true, res.user);
-      router.push('/dashboard');
+      // Redirect to OTP verification page with email
+      router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
     } catch (err: unknown) {
       const getErrorMessage = (e: unknown) => {
         if (e instanceof Error) return e.message;

@@ -20,6 +20,30 @@ export type RegisterRequest = {
   role?: 'investor' | 'admin';
 };
 
+export type SendOTPRequest = {
+  email: string;
+};
+
+export type SendOTPResponse = {
+  message: string;
+  expiresIn?: number;
+};
+
+export type VerifyOTPRequest = {
+  email: string;
+  otp: string;
+};
+
+export type VerifyOTPResponse = {
+  message: string;
+  token?: string;
+  user?: unknown;
+};
+
+export type LogoutResponse = {
+  message: string;
+};
+
 const DEFAULT_TIMEOUT = 10000; // ms
 
 async function timeoutPromise<T>(promise: Promise<T>, ms = DEFAULT_TIMEOUT) {
@@ -54,8 +78,8 @@ async function postJson<TReq extends object, TRes>(path: string, body: TReq, tok
     && process.env.NODE_ENV === 'development'
     && path.startsWith('/api/');
 
-  let res: Response | undefined;
-  let lastError: unknown;
+    let res: Response | undefined;
+    let lastError: unknown;
   // Try primary URL first (same-origin or env base)
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) {
@@ -129,11 +153,19 @@ export async function register(req: RegisterRequest): Promise<LoginResponse> {
   return postJson<RegisterRequest, LoginResponse>('/api/auth/register', req);
 }
 
-export async function logout(token: string): Promise<{ message: string }> {
-  return postJson<object, { message: string }>('/api/auth/logout', {}, token);
+export async function sendOTP(req: SendOTPRequest): Promise<SendOTPResponse> {
+  return postJson<SendOTPRequest, SendOTPResponse>('/api/auth/resend-otp', req);
 }
 
-const api = { login, register, logout };
+export async function verifyOTP(req: VerifyOTPRequest): Promise<VerifyOTPResponse> {
+  return postJson<VerifyOTPRequest, VerifyOTPResponse>('/api/auth/verify-email', req);
+}
+
+export async function logout(token: string): Promise<LogoutResponse> {
+  return postJson<Record<string, never>, LogoutResponse>('/api/auth/logout', {}, token);
+}
+
+const api = { login, register, sendOTP, verifyOTP, logout };
 
 export default api;
 

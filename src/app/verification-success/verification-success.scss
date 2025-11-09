@@ -1,0 +1,378 @@
+@import '../../styles/tokens';
+
+.auth-page {
+  background: linear-gradient(135deg, $bg-dark 0%, $bg-secondary 100%);
+  min-height: 100vh;
+  padding: 120px 1rem 4rem;
+  position: relative;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 96px 0.75rem 2.5rem;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 50%, rgba($primary-color, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+}
+
+.auth-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: start;
+
+  @media (max-width: $breakpoint-lg) {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    max-width: 420px;
+    gap: 2rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    max-width: 360px;
+    gap: 1.5rem;
+  }
+}
+
+.auth-card {
+  background: $bg-card;
+  border-radius: $border-radius-lg;
+  padding: 3rem;
+  border: 1px solid rgba($primary-color, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 1;
+
+  &.success-card {
+    padding: 3.5rem 3rem;
+
+    @media (max-width: $breakpoint-md) {
+      padding: 2.5rem 2rem;
+    }
+    @media (max-width: $breakpoint-sm) {
+      padding: 2rem 1.5rem;
+    }
+  }
+
+  @media (max-width: $breakpoint-md) {
+    padding: 2rem;
+  }
+  @media (max-width: $breakpoint-sm) {
+    padding: 1.5rem 1rem;
+  }
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+
+  .success-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, rgba($success-color, 0.2) 0%, rgba($success-color, 0.1) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: $success-color;
+    border: 3px solid rgba($success-color, 0.3);
+    animation: scaleIn 0.5s ease-out;
+
+    svg {
+      stroke-width: 2;
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      transform: scale(0);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .auth-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, rgba($primary-color, 0.2) 0%, rgba($primary-color, 0.1) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: $primary-color;
+    border: 2px solid rgba($primary-color, 0.3);
+
+    svg {
+      stroke-width: 1.5;
+    }
+  }
+
+  .auth-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: $text-primary;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, $text-primary 0%, $primary-color 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .auth-subtitle {
+    font-size: 1rem;
+    color: $text-secondary;
+    margin: 0.5rem 0;
+  }
+
+  .auth-email {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $primary-color;
+    margin: 0.5rem 0 0;
+    word-break: break-all;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    .auth-title {
+      font-size: 1.5rem;
+    }
+    .auth-subtitle {
+      font-size: 0.9rem;
+    }
+    .auth-email {
+      font-size: 0.9rem;
+    }
+    .success-icon {
+      width: 80px;
+      height: 80px;
+    }
+  }
+}
+
+.success-content {
+  text-align: center;
+  margin-bottom: 2.5rem;
+
+  .success-message {
+    font-size: 1rem;
+    color: $text-secondary;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+
+    @media (max-width: $breakpoint-sm) {
+      font-size: 0.95rem;
+      padding: 0;
+    }
+  }
+
+  .success-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .btn-gold {
+      width: 100%;
+      background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 10%) 100%);
+      color: $text-dark;
+      border: none;
+      padding: 1rem;
+      font-weight: 600;
+      font-size: 1.05rem;
+      border-radius: $border-radius;
+      transition: all $transition-base;
+      box-shadow: 0 4px 15px rgba($primary-color, 0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+
+      @media (max-width: $breakpoint-sm) {
+        padding: 0.875rem;
+        font-size: 1rem;
+      }
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba($primary-color, 0.4);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .home-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: $text-secondary;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: color $transition-base;
+      padding: 0.5rem 1rem;
+
+      &:hover {
+        color: $primary-color;
+      }
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+.success-features {
+  margin-top: 2.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid rgba($border-color, 0.1);
+
+  .features-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $text-primary;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    background: linear-gradient(135deg, $text-primary 0%, $primary-color 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      padding: 1.25rem 0;
+      border-bottom: 1px solid rgba($border-color, 0.05);
+
+      &:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .feature-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 10%) 100%);
+        color: $text-dark;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.125rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba($primary-color, 0.3);
+      }
+
+      div {
+        flex: 1;
+
+        strong {
+          display: block;
+          color: $text-primary;
+          font-size: 1.05rem;
+          margin-bottom: 0.5rem;
+        }
+
+        p {
+          color: $text-secondary;
+          font-size: 0.9rem;
+          line-height: 1.5;
+          margin: 0;
+        }
+      }
+    }
+  }
+}
+
+.auth-benefits {
+  background: rgba($bg-card, 0.5);
+  border-radius: $border-radius-lg;
+  padding: 2.5rem;
+  border: 1px solid rgba($primary-color, 0.1);
+  position: relative;
+  z-index: 1;
+
+  @media (max-width: $breakpoint-lg) {
+    display: none;
+  }
+
+  .benefits-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $text-primary;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, $text-primary 0%, $primary-color 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .benefits-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 0;
+      color: $text-secondary;
+      font-size: 1rem;
+      line-height: 1.6;
+      border-bottom: 1px solid rgba($border-color, 0.05);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .benefit-icon {
+        width: 28px;
+        height: 28px;
+        background: $success-color;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+
