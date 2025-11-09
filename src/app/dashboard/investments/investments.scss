@@ -33,9 +33,36 @@
   }
 
   .investment-table {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #ffd700 rgba(255, 255, 255, 0.1);
+    
+    // Desktop scrollbar
+    &::-webkit-scrollbar {
+      height: 10px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #ffd700;
+      border-radius: 6px;
+      
+      &:hover {
+        background: #e6c200;
+      }
+    }
+    
     .table {
       background: transparent;
       color: #ffffff;
+      min-width: 800px; // Ensure minimum width for proper display
       
       th {
         background: rgba(255, 215, 0, 0.1);
@@ -157,6 +184,41 @@
 
   // Mobile responsive adjustments
   @media (max-width: 768px) {
+    &.investments-page.container-custom {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+    
+    .card {
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
+      width: calc(100% - 1rem);
+    }
+    
+    .investment-table {
+      // Make scrollbar more visible on mobile
+      &::-webkit-scrollbar {
+        height: 14px;
+        -webkit-appearance: none;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        margin: 0 4px;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: #ffd700;
+        border-radius: 6px;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+        
+        &:active {
+          background: #e6c200;
+        }
+      }
+    }
+    
     .filters-section {
       .row {
         flex-direction: column;
@@ -380,6 +442,40 @@
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+  
+  // Ensure cards contain their content
+  .card {
+    overflow: hidden;
+    max-width: 100%;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+    
+    .card-body {
+      overflow: hidden;
+      max-width: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      
+      &.p-0 {
+        padding: 0 !important;
+      }
+      
+      // Ensure all child elements don't overflow
+      > * {
+        max-width: 100%;
+      }
+      
+      // Fix flex containers inside cards
+      .d-flex {
+        flex-wrap: wrap;
+        max-width: 100%;
+      }
+    }
   }
 
   // Quick actions styling

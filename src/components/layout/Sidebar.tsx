@@ -3,7 +3,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import '@/styles/components.scss';
-import { LayoutDashboard, BarChart3, ClipboardList, Receipt, Wallet, Users, MessageCircle } from 'lucide-react';
+import { LayoutDashboard, BarChart3, ClipboardList, Receipt, Wallet, Users, MessageCircle, LogOut } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import { clearToken, getToken } from '@/lib/auth';
+import { logout } from '@/lib/api';
 
 export const menuItems = [
   { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
@@ -17,6 +20,20 @@ export const menuItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+
+  const handleLogout = async () => {
+    try {
+      const token = getToken();
+      if (token) {
+        await logout(token);
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      clearToken();
+      window.location.href = '/login';
+    }
+  };
 
   return (
     <aside
@@ -46,6 +63,11 @@ export default function Sidebar() {
               </li>
             );
           })}
+          <li className="mt-2 px-4">
+            <Button variant="outline" className="w-100" onClick={handleLogout}>
+              <LogOut size={16} className="me-2" /> Logout
+            </Button>
+          </li>
         </ul>
       </nav>
     </aside>

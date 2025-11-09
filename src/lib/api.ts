@@ -63,7 +63,7 @@ function getBaseUrl() {
   return '';
 }
 
-async function postJson<TReq extends object, TRes>(path: string, body: TReq): Promise<TRes> {
+async function postJson<TReq extends object, TRes>(path: string, body: TReq, token?: string): Promise<TRes> {
   // Use absolute base when provided; otherwise fallback to same-origin (rewrite)
   const isBrowser = typeof window !== 'undefined';
   const base = getBaseUrl();
@@ -77,11 +77,15 @@ async function postJson<TReq extends object, TRes>(path: string, body: TReq): Pr
     let res: Response | undefined;
     let lastError: unknown;
   // Try primary URL first (same-origin or env base)
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
   try {
     res = await timeoutPromise(
       fetch(primaryUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(body),
       })
     ) as Response;
@@ -94,7 +98,7 @@ async function postJson<TReq extends object, TRes>(path: string, body: TReq): Pr
         res = await timeoutPromise(
           fetch(fallbackUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify(body),
           })
         ) as Response;

@@ -3,14 +3,19 @@
 import Link from 'next/link';
 import '@/styles/components.scss';
 import { usePathname } from 'next/navigation';
-import { menuItems } from './Sidebar';
+import { LogOut } from 'lucide-react';
+import Button from '@/components/ui/Button';
+
+type MenuItem = { href: string; label: string; icon: React.ReactNode };
 
 type MobileSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
+  items: MenuItem[];
+  onLogout?: () => void;
 };
 
-export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
+export default function MobileSidebar({ isOpen, onClose, items, onLogout }: MobileSidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -41,7 +46,7 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
       >
         <nav className="py-3 sidebar-nav">
           <ul className="list-unstyled">
-            {menuItems.map((item) => {
+            {items.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <li key={item.href}>
@@ -58,6 +63,13 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                 </li>
               );
             })}
+            {onLogout && (
+              <li className="mt-2 px-4">
+                <Button variant="outline" className="w-100" onClick={onLogout}>
+                  <LogOut size={16} className="me-2" /> Logout
+                </Button>
+              </li>
+            )}
           </ul>
         </nav>
       </aside>

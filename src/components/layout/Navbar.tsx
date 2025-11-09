@@ -2,12 +2,35 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Crown } from 'lucide-react';
 import './Header.scss';
 import MobileSidebar from './MobileSidebar';
+import { menuItems } from './Sidebar';
+import { adminMenuItems } from '@/components/admin/AdminSidebar';
+import { clearToken, getToken } from '@/lib/auth';
+import { logout } from '@/lib/api';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isAdminRoute = pathname.startsWith('/admin');
+  const mobileMenu = isAdminRoute ? adminMenuItems : menuItems;
+
+  const handleLogout = async () => {
+    try {
+      const token = getToken();
+      if (token) {
+        await logout(token);
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      clearToken();
+      window.location.href = '/login';
+    }
+  };
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark site-header site-header--gold">
@@ -55,7 +78,7 @@ export default function Navbar() {
                   <hr className="dropdown-divider" />
                 </li>
                 <li>
-                  <button className="dropdown-item text-danger">Logout</button>
+                  <button className="dropdown-item text-danger" onClick={handleLogout}>Logout</button>
                 </li>
               </ul>
             </li>
@@ -63,7 +86,7 @@ export default function Navbar() {
         </div>
       </div>
       {/* Mobile Drawer */}
-      <MobileSidebar isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <MobileSidebar isOpen={isOpen} onClose={() => setIsOpen(false)} items={mobileMenu} onLogout={handleLogout} />
     </nav>
   );
 }

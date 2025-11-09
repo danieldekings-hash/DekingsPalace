@@ -1,20 +1,95 @@
 @import '@/styles/tokens';
 
 .dashboard-page {
+  // Prevent horizontal overflow on mobile
+  overflow-x: hidden !important;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  
+  // Ensure rows don't overflow
+  .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  // Ensure columns don't overflow
+  [class*="col-"] {
+    max-width: 100%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
   .card {
     background-color: $bg-card;
     border-radius: $border-radius-lg;
+    overflow: hidden; // Prevent card content from overflowing
+    max-width: 100%;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+    
+    .card-body {
+      overflow: hidden; // Ensure card body contains its content
+      max-width: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      
+      &.p-0 {
+        padding: 0 !important;
+      }
+      
+      // Ensure all child elements don't overflow
+      > * {
+        max-width: 100%;
+      }
+      
+      // Fix flex containers inside cards
+      .d-flex {
+        flex-wrap: wrap;
+        max-width: 100%;
+      }
+    }
   }
 
   .list-group-item {
     background-color: transparent;
     border-color: rgba($primary-color, 0.15);
   }
+  
+  // Global table responsive wrapper styles
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
 }
 
 // Make dashboard content use a wider, responsive container than the global default
 .dashboard-page.container-custom {
   max-width: 960px; // default for >= lg
+  overflow-x: hidden;
+  padding-left: 1rem;
+  padding-right: 1rem;
+
+  @media (max-width: $breakpoint-md) {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    max-width: 100% !important;
+  }
 
   @media (min-width: $breakpoint-md) {
     max-width: 720px;
@@ -55,6 +130,193 @@
 @media (max-width: 575.98px) {
   .dashboard-layout {
     padding-top: 96px;
+  }
+}
+
+// Admin page styles
+.dashboard-layout {
+  main {
+    overflow-x: hidden !important;
+    max-width: 100%;
+    position: relative;
+    
+    // Ensure rows don't overflow
+    .row {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      max-width: 100%;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    
+    // Ensure columns don't overflow
+    [class*="col-"] {
+      max-width: 100%;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    
+    .card {
+      overflow: hidden;
+      max-width: 100%;
+      width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+      box-sizing: border-box;
+      
+      .card-body {
+        overflow: hidden;
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        
+        &.p-0 {
+          padding: 0 !important;
+        }
+        
+        > * {
+          max-width: 100%;
+        }
+        
+        .d-flex {
+          flex-wrap: wrap;
+          max-width: 100%;
+        }
+      }
+    }
+  }
+}
+
+// Mobile card fixes
+@media (max-width: $breakpoint-md) {
+  .dashboard-page {
+    &.container-custom {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+    
+    .card {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      max-width: 100% !important;
+      
+      .card-body {
+        padding: 1rem !important;
+        
+        &.p-0 {
+          padding: 0 !important;
+        }
+      }
+      
+      // Fix card headers
+      .card-header {
+        padding: 0.75rem 1rem;
+        overflow: hidden;
+        max-width: 100%;
+      }
+    }
+    
+    // Ensure stat cards fit properly
+    .col-6, .col-md-3, .col-md-4, .col-md-6 {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+  }
+  
+  // Admin pages tablet fixes
+  .dashboard-layout main {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    
+    .card {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      max-width: 100% !important;
+      
+      .card-body {
+        padding: 1rem !important;
+        
+        &.p-0 {
+          padding: 0 !important;
+        }
+      }
+    }
+    
+    [class*="col-"] {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .dashboard-page {
+    &.container-custom {
+      padding-left: 0.75rem !important;
+      padding-right: 0.75rem !important;
+    }
+    
+    .card {
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
+      width: calc(100% - 1rem);
+      
+      .card-body {
+        padding: 0.75rem !important;
+        
+        &.p-0 {
+          padding: 0 !important;
+        }
+        
+        // Reduce font sizes to prevent overflow
+        h1, h2, h3, h4, h5, h6 {
+          font-size: clamp(0.875rem, 3vw, 1.5rem);
+        }
+      }
+    }
+    
+    // Extra small columns
+    .col-6, .col-md-3, .col-md-4, .col-md-6 {
+      padding-left: 0.4rem;
+      padding-right: 0.4rem;
+    }
+    
+    // Ensure proper spacing for all content
+    > * {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+  
+  // Admin pages mobile fixes
+  .dashboard-layout main {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    
+    .card {
+      margin-left: 0.25rem;
+      margin-right: 0.25rem;
+      width: calc(100% - 0.5rem);
+      
+      .card-body {
+        padding: 0.75rem !important;
+        
+        &.p-0 {
+          padding: 0 !important;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+          font-size: clamp(0.875rem, 3vw, 1.5rem);
+        }
+      }
+    }
+    
+    [class*="col-"] {
+      padding-left: 0.4rem;
+      padding-right: 0.4rem;
+    }
   }
 }
 

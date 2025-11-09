@@ -1,3 +1,4 @@
+// ✅ Fully Rewritten Responsive Table Component
 'use client';
 
 import React, { useState } from 'react';
@@ -28,13 +29,12 @@ export interface TableProps<T = Record<string, unknown>> {
   hoverable?: boolean;
   striped?: boolean;
   bordered?: boolean;
-  // Pagination props
+  responsive?: boolean;
   pagination?: boolean;
   itemsPerPage?: number;
   showPaginationInfo?: boolean;
   showItemsPerPageSelector?: boolean;
   itemsPerPageOptions?: number[];
-  // Slider props
   slider?: boolean;
   sliderHeight?: string;
   sliderWidth?: string;
@@ -55,27 +55,24 @@ export default function Table<T = Record<string, unknown>>({
   hoverable = true,
   striped = false,
   bordered = true,
-  // Pagination props
+  responsive = true,
   pagination = false,
   itemsPerPage = 10,
   showPaginationInfo = true,
   showItemsPerPageSelector = true,
   itemsPerPageOptions = [5, 10, 25, 50, 100],
-  // Slider props
-  slider = false,
+  slider = true,
   sliderHeight = '400px',
-  sliderWidth = '100%'
+  sliderWidth = '100%',
 }: TableProps<T>) {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentItemsPerPage, setCurrentItemsPerPage] = useState(itemsPerPage);
 
-  // Pagination logic
   const totalPages = Math.ceil(data.length / currentItemsPerPage);
   const startIndex = (currentPage - 1) * currentItemsPerPage;
   const endIndex = startIndex + currentItemsPerPage;
   const paginatedData = pagination ? data.slice(startIndex, endIndex) : data;
 
-  // Reset to first page when items per page changes
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setCurrentItemsPerPage(newItemsPerPage);
     setCurrentPage(1);
@@ -87,7 +84,6 @@ export default function Table<T = Record<string, unknown>>({
 
   const handleSort = (column: string) => {
     if (!onSort) return;
-    
     const newDirection = sortColumn === column && sortDirection === 'asc' ? 'desc' : 'asc';
     onSort(column, newDirection);
   };
@@ -99,215 +95,134 @@ export default function Table<T = Record<string, unknown>>({
 
   const renderCell = (column: TableColumn<T>, item: T, index: number) => {
     const value = (item as Record<string, unknown>)[column.key];
-    
-    if (column.render) {
-      return column.render(value, item, index);
-    }
-    
-    // Ensure we return a valid React node
-    if (value === null || value === undefined) {
-      return <span className="text-muted">-</span>;
-    }
-    
+    if (column.render) return column.render(value, item, index);
+    if (value === null || value === undefined) return <span className="text-muted">-</span>;
     return <span>{String(value)}</span>;
   };
 
-  if (loading) {
-    return (
-      <div className="table-loading">
-        <div className="spinner-wrapper">
-          <div className="spinner"></div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="table-loading"><div className="spinner"></div></div>;
 
-  if (data.length === 0) {
-    return (
-      <div className="table-empty">
-        {emptyIcon && <div className="empty-icon">{emptyIcon}</div>}
-        <div className="empty-message">{emptyMessage}</div>
-      </div>
-    );
-  }
+  if (data.length === 0) return (
+    <div className="table-empty">
+      {emptyIcon && <div className="empty-icon">{emptyIcon}</div>}
+      <div className="empty-message">{emptyMessage}</div>
+    </div>
+  );
 
   const renderPaginationControls = () => {
     if (!pagination || totalPages <= 1) return null;
 
-    const getVisiblePages = () => {
-      const maxVisible = 5;
-      if (totalPages <= maxVisible) {
-        return Array.from({ length: totalPages }, (_, i) => i + 1);
-      }
-      
-      if (currentPage <= 3) {
-        return [1, 2, 3, 4, 5];
-      } else if (currentPage >= totalPages - 2) {
-        return Array.from({ length: 5 }, (_, i) => totalPages - 4 + i);
-      } else {
-        return [currentPage - 2, currentPage - 1, currentPage, currentPage + 1, currentPage + 2];
-      }
+    const visiblePages = () => {
+      const max = 5;
+      if (totalPages <= max) return Array.from({ length: totalPages }, (_, i) => i + 1);
+      if (currentPage <= 3) return [1, 2, 3, 4, 5];
+      if (currentPage >= totalPages - 2) return Array.from({ length: 5 }, (_, i) => totalPages - 4 + i);
+      return [currentPage - 2, currentPage - 1, currentPage, currentPage + 1, currentPage + 2];
     };
 
     return (
       <div className="table-pagination">
         <div className="d-flex justify-content-between align-items-center">
-          {/* Pagination Info */}
           {showPaginationInfo && (
-            <div className="pagination-info">
-              <span className="text-secondary">
-                Showing {startIndex + 1} to {Math.min(endIndex, data.length)} of {data.length} entries
-              </span>
-            </div>
+            <div className="pagination-info text-secondary">Showing {startIndex + 1} to {Math.min(endIndex, data.length)} of {data.length} entries</div>
           )}
 
-          {/* Items per page selector */}
           {showItemsPerPageSelector && (
-            <div className="items-per-page-selector d-flex align-items-center gap-2">
-              <span className="text-secondary small">Show:</span>
+            <div className="items-per-page-selector">
               <select
-                className="form-select form-select-sm bg-dark-custom text-white border-light"
-                style={{ width: 'auto' }}
+                className="form-select form-select-sm bg-dark-custom text-white"
                 value={currentItemsPerPage}
                 onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
               >
-                {itemsPerPageOptions.map(option => (
+                {itemsPerPageOptions.map((option) => (
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>
-              <span className="text-secondary small">entries</span>
             </div>
           )}
 
-          {/* Pagination Controls */}
-          <div className="pagination-controls">
-            <nav aria-label="Table pagination">
-              <ul className="pagination pagination-sm mb-0">
-                {/* First Page */}
-                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                  <button
-                    className="page-link bg-dark-custom text-white border-gold"
-                    onClick={() => handlePageChange(1)}
-                    disabled={currentPage === 1}
-                    title="First page"
-                  >
-                    <ChevronsLeft size={16} />
-                  </button>
-                </li>
+          <ul className="pagination pagination-sm mb-0">
+            <li>
+              <button className="page-link" disabled={currentPage === 1} onClick={() => handlePageChange(1)}>
+                <ChevronsLeft size={16} />
+              </button>
+            </li>
+            <li>
+              <button className="page-link" disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>
+                <ChevronLeft size={16} />
+              </button>
+            </li>
 
-                {/* Previous Page */}
-                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                  <button
-                    className="page-link bg-dark-custom text-white border-gold"
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    title="Previous page"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                </li>
+            {visiblePages().map((pageNum) => (
+              <li key={pageNum}>
+                <button className={`page-link ${currentPage === pageNum ? 'active' : ''}`} onClick={() => handlePageChange(pageNum)}>
+                  {pageNum}
+                </button>
+              </li>
+            ))}
 
-                {/* Page Numbers */}
-                {getVisiblePages().map((pageNum) => (
-                  <li key={pageNum} className={`page-item ${currentPage === pageNum ? 'active' : ''}`}>
-                    <button
-                      className="page-link bg-dark-custom text-white border-gold"
-                      onClick={() => handlePageChange(pageNum)}
-                    >
-                      {pageNum}
-                    </button>
-                  </li>
-                ))}
-
-                {/* Next Page */}
-                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                  <button
-                    className="page-link bg-dark-custom text-white border-gold"
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    title="Next page"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
-                </li>
-
-                {/* Last Page */}
-                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                  <button
-                    className="page-link bg-dark-custom text-white border-gold"
-                    onClick={() => handlePageChange(totalPages)}
-                    disabled={currentPage === totalPages}
-                    title="Last page"
-                  >
-                    <ChevronsRight size={16} />
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          </div>
+            <li>
+              <button className="page-link" disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)}>
+                <ChevronRight size={16} />
+              </button>
+            </li>
+            <li>
+              <button className="page-link" disabled={currentPage === totalPages} onClick={() => handlePageChange(totalPages)}>
+                <ChevronsRight size={16} />
+              </button>
+            </li>
+          </ul>
         </div>
       </div>
     );
   };
 
-  const tableContent = (
-    <table className={`table table-custom ${striped ? 'table-striped' : ''} ${bordered ? 'table-bordered' : ''}`}>
-      <thead>
-        <tr>
-          {columns.map((column) => (
-            <th
-              key={column.key}
-              className={`${column.className || ''} ${column.sortable ? 'sortable' : ''}`}
-              style={{ width: column.width }}
-              onClick={() => column.sortable && handleSort(column.key)}
-            >
-              <div className="th-content">
-                <span>{column.label}</span>
-                {column.sortable && (
-                  <span className="sort-icon">
-                    {getSortIcon(column.key)}
-                  </span>
-                )}
-              </div>
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {paginatedData.map((item, index) => (
-          <tr
-            key={index}
-            className={`${rowClassName ? rowClassName(item, index) : ''} ${hoverable ? 'hoverable' : ''}`}
-            onClick={() => onRowClick?.(item, index)}
-          >
-            {columns.map((column) => (
-              <td key={column.key} className={column.className}>
-                {renderCell(column, item, index)}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-
   return (
     <div className={`table-container ${className}`}>
-      {slider ? (
-        <div 
-          className="table-slider"
-          style={{ 
-            height: sliderHeight, 
-            width: sliderWidth,
-            overflowY: 'auto',
-            overflowX: 'auto'
-          }}
-        >
-          {tableContent}
-        </div>
-      ) : (
-        tableContent
-      )}
+      <div
+        className={`table-slider-wrapper ${responsive ? 'table-responsive' : ''}`}
+        style={{
+          maxHeight: slider ? sliderHeight : 'auto',
+          width: sliderWidth,
+          overflowX: 'auto',
+          overflowY: slider ? 'auto' : 'visible',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        <table className={`table table-custom ${striped ? 'table-striped' : ''} ${bordered ? 'table-bordered' : ''}`}>
+            <thead>
+              <tr>
+                {columns.map((column) => (
+                  <th
+                    key={column.key}
+                    className={column.sortable ? 'sortable' : ''}
+                    style={{ width: column.width }}
+                    onClick={() => column.sortable && handleSort(column.key)}
+                  >
+                    <div className="th-content">
+                      <span>{column.label}</span>
+                      {column.sortable && <span className="sort-icon">{getSortIcon(column.key)}</span>}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedData.map((item, index) => (
+                <tr
+                  key={index}
+                  className={`${rowClassName ? rowClassName(item, index) : ''} ${hoverable ? 'hoverable' : ''}`}
+                  onClick={() => onRowClick?.(item, index)}
+                >
+                  {columns.map((column) => (
+                    <td key={column.key}>{renderCell(column, item, index)}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+      </div>
+
       {renderPaginationControls()}
     </div>
   );
