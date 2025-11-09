@@ -20,6 +20,26 @@ export type RegisterRequest = {
   role?: 'investor' | 'admin';
 };
 
+export type SendOTPRequest = {
+  email: string;
+};
+
+export type SendOTPResponse = {
+  message: string;
+  expiresIn?: number;
+};
+
+export type VerifyOTPRequest = {
+  email: string;
+  otp: string;
+};
+
+export type VerifyOTPResponse = {
+  message: string;
+  token?: string;
+  user?: unknown;
+};
+
 const DEFAULT_TIMEOUT = 10000; // ms
 
 async function timeoutPromise<T>(promise: Promise<T>, ms = DEFAULT_TIMEOUT) {
@@ -54,8 +74,8 @@ async function postJson<TReq extends object, TRes>(path: string, body: TReq): Pr
     && process.env.NODE_ENV === 'development'
     && path.startsWith('/api/');
 
-  let res: Response | undefined;
-  let lastError: unknown;
+    let res: Response | undefined;
+    let lastError: unknown;
   // Try primary URL first (same-origin or env base)
   try {
     res = await timeoutPromise(
@@ -125,7 +145,15 @@ export async function register(req: RegisterRequest): Promise<LoginResponse> {
   return postJson<RegisterRequest, LoginResponse>('/api/auth/register', req);
 }
 
-const api = { login, register };
+export async function sendOTP(req: SendOTPRequest): Promise<SendOTPResponse> {
+  return postJson<SendOTPRequest, SendOTPResponse>('/api/auth/resend-otp', req);
+}
+
+export async function verifyOTP(req: VerifyOTPRequest): Promise<VerifyOTPResponse> {
+  return postJson<VerifyOTPRequest, VerifyOTPResponse>('/api/auth/verify-email', req);
+}
+
+const api = { login, register, sendOTP, verifyOTP };
 
 export default api;
 
