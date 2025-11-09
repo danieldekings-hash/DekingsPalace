@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Suspense, useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Crown, Mail, Shield, ArrowLeft } from 'lucide-react';
+import { Mail, Shield, ArrowLeft } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import './verify-otp.scss';

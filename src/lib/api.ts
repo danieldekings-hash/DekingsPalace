@@ -40,6 +40,10 @@ export type VerifyOTPResponse = {
   user?: unknown;
 };
 
+export type LogoutResponse = {
+  message: string;
+};
+
 const DEFAULT_TIMEOUT = 10000; // ms
 
 async function timeoutPromise<T>(promise: Promise<T>, ms = DEFAULT_TIMEOUT) {
@@ -157,7 +161,11 @@ export async function verifyOTP(req: VerifyOTPRequest): Promise<VerifyOTPRespons
   return postJson<VerifyOTPRequest, VerifyOTPResponse>('/api/auth/verify-email', req);
 }
 
-const api = { login, register, sendOTP, verifyOTP };
+export async function logout(token: string): Promise<LogoutResponse> {
+  return postJson<Record<string, never>, LogoutResponse>('/api/auth/logout', {}, token);
+}
+
+const api = { login, register, sendOTP, verifyOTP, logout };
 
 export default api;
 
