@@ -54,21 +54,13 @@ export default function WalletPage() {
     <div className="dashboard-page container-custom wallet-page">
       {/* Wallet Summary Card */}
       <div className="card border-gold card-hover wallet-summary mx-auto mb-4">
-        <div className="card-body d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-          <div className="d-flex align-items-center gap-3">
-            <div className="text-gold"><WalletIcon size={28} /></div>
-            <div>
-              <p className="text-secondary mb-1 small">Available Balance</p>
-              <h3 className="fw-bold mb-0">
-                {balances[currency].toLocaleString(undefined, { maximumFractionDigits: 8 })} {currency}
-              </h3>
-            </div>
-          </div>
-          <div className="summary-address input-wrapper border-gold w-100 w-md-auto">
-            <input className="form-control bg-dark-custom text-white" readOnly value={address} />
-            <button type="button" className="icon-btn" onClick={copyAddress} aria-label="Copy address">
-              <Copy size={18} />
-            </button>
+        <div className="card-body d-flex align-items-center gap-3">
+          <div className="text-gold"><WalletIcon size={28} /></div>
+          <div>
+            <p className="mb-1 fw-bold h5">Available Balance</p>
+            <h3 className="fw-bold mb-0">
+              {balances.USDT.toLocaleString(undefined, { maximumFractionDigits: 2 })} USDT
+            </h3>
           </div>
         </div>
       </div>
