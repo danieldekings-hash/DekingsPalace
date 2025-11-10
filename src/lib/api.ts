@@ -67,6 +67,88 @@ function getBaseUrl() {
   return '';
 }
 
+async function getJson<TRes>(path: string, token?: string, signal?: AbortSignal): Promise<TRes> {
+  const isBrowser = typeof window !== 'undefined';
+  const base = getBaseUrl();
+  const primaryUrl = base ? `${base}${path}` : (isBrowser ? path : `${base}${path}`);
+  const canTryDevFallback =
+    (!process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_URL.trim().length === 0)
+    && typeof window !== 'undefined'
+    && process.env.NODE_ENV === 'development'
+    && path.startsWith('/api/');
+
+  let res: Response | undefined;
+  let lastError: unknown;
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  try {
+    res = await timeoutPromise(
+      fetch(primaryUrl, {
+        method: 'GET',
+        headers,
+        signal,
+      })
+    ) as Response;
+  } catch (e: unknown) {
+    lastError = e;
+    const isAbort =
+      (typeof DOMException !== 'undefined' && e instanceof DOMException && e.name === 'AbortError') ||
+      (typeof e === 'object' && e !== null && 'name' in e && (e as { name?: unknown }).name === 'AbortError');
+    if (isAbort) {
+      throw e as unknown as Error;
+    }
+    if (canTryDevFallback) {
+      const fallbackUrl = `http://localhost:5500${path}`;
+      try {
+        res = await timeoutPromise(
+          fetch(fallbackUrl, {
+            method: 'GET',
+            headers,
+            signal,
+          })
+        ) as Response;
+      } catch (e2: unknown) {
+        const m1 = lastError instanceof Error ? lastError.message : 'Unknown network error';
+        const m2 = e2 instanceof Error ? e2.message : 'Unknown network error';
+        throw new Error(
+          `Network error. Tried '${primaryUrl}' (${m1}) and fallback 'http://localhost:5500${path}' (${m2}). Ensure backend is running and CORS allows this origin.`
+        );
+      }
+    } else {
+      const message = e instanceof Error ? e.message : 'Unknown network error';
+      throw new Error(
+        `Network error. Ensure API '${primaryUrl}' is reachable and CORS allows this origin. (${message})`
+      );
+    }
+  }
+
+  if (!res!.ok) {
+    const text = await res.text();
+    let message = text;
+    try {
+      const json = JSON.parse(text || '{}');
+      message = (json && (json.message || json.error)) || JSON.stringify(json) || text;
+    } catch {
+      // ignore parse errors
+    }
+
+    const looksLikeHtml = typeof message === 'string' && /<\/?[a-z][\s\S]*>/i.test(message);
+    if (looksLikeHtml) {
+      // eslint-disable-next-line no-console
+      console.error('Server returned HTML for API request:', text);
+      message = `Request failed with status ${res.status} ${res.statusText || ''}`.trim();
+    }
+
+    throw new Error(message || 'Request failed');
+  }
+
+  const data = await res!.json();
+  return data as TRes;
+}
+
 async function postJson<TReq extends object, TRes>(path: string, body: TReq, token?: string): Promise<TRes> {
   // Use absolute base when provided; otherwise fallback to same-origin (rewrite)
   const isBrowser = typeof window !== 'undefined';
@@ -165,7 +247,24 @@ export async function logout(token: string): Promise<LogoutResponse> {
   return postJson<Record<string, never>, LogoutResponse>('/api/auth/logout', {}, token);
 }
 
-const api = { login, register, sendOTP, verifyOTP, logout };
+export async function getPlans(token?: string, signal?: AbortSignal): Promise<unknown> {
+  return getJson<unknown>('/api/plans', token, signal);
+}
+
+export type CreateInvestmentRequest = {
+  planId?: string;
+  plan?: string;
+  amount: number;
+  currency?: string;
+};
+
+export type CreateInvestmentResponse = unknown;
+
+export async function createInvestment(req: CreateInvestmentRequest, token?: string): Promise<CreateInvestmentResponse> {
+  return postJson<CreateInvestmentRequest, CreateInvestmentResponse>('/api/investments', req, token);
+}
+
+const api = { login, register, sendOTP, verifyOTP, logout, getPlans, createInvestment };
 
 export default api;
 

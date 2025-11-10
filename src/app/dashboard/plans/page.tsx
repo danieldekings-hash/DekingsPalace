@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, Star, TrendingUp, Shield, Clock, DollarSign } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import api from '@/lib/api';
+import auth from '@/lib/auth';
 import '../dashboard.scss';
 import './plans.scss';
 
@@ -19,110 +21,116 @@ export interface InvestmentPlan {
   description: string;
 }
 
+type PlanApiItem = {
+  id?: unknown;
+  name?: unknown;
+  tier?: unknown;
+  minAmount?: unknown;
+  min?: unknown;
+  maxAmount?: unknown;
+  max?: unknown;
+  percentage?: unknown;
+  rate?: unknown;
+  color?: unknown;
+  features?: unknown;
+  popular?: unknown;
+  description?: unknown;
+};
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
 export default function PlansPage() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [investmentAmount, setInvestmentAmount] = useState<number>(0);
+  const [plans, setPlans] = useState<InvestmentPlan[] | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isInvesting, setIsInvesting] = useState<boolean>(false);
+  const [investError, setInvestError] = useState<string | null>(null);
+  const [investSuccess, setInvestSuccess] = useState<{ reference?: string; investmentId?: string } | null>(null);
 
-  const investmentPlans: InvestmentPlan[] = [
-    {
-      id: 'bronze',
-      name: 'Bronze Plan',
-      tier: 'Bronze',
-      minAmount: 20,
-      maxAmount: 50,
-      percentage: 5,
-      color: '#CD7F32',
-      description: 'Perfect for beginners looking to start their investment journey',
-      features: [
-        '5% Monthly Returns',
-        'Minimum $20 Investment',
-        'Maximum $50 Investment',
-        '24/7 Support',
-        'Secure Transactions'
-      ]
-    },
-    {
-      id: 'silver',
-      name: 'Silver Plan',
-      tier: 'Silver',
-      minAmount: 51,
-      maxAmount: 100,
-      percentage: 8,
-      color: '#C0C0C0',
-      description: 'Ideal for moderate investors seeking steady growth',
-      features: [
-        '8% Monthly Returns',
-        'Minimum $51 Investment',
-        'Maximum $100 Investment',
-        'Priority Support',
-        'Advanced Analytics',
-        'Risk Management'
-      ]
-    },
-    {
-      id: 'gold',
-      name: 'Gold Plan',
-      tier: 'Gold',
-      minAmount: 101,
-      maxAmount: 500,
-      percentage: 10,
-      color: '#FFD700',
-      description: 'Premium plan for serious investors',
-      features: [
-        '10% Monthly Returns',
-        'Minimum $101 Investment',
-        'Maximum $500 Investment',
-        'VIP Support',
-        'Personal Account Manager',
-        'Advanced Trading Tools',
-        'Exclusive Market Insights'
-      ],
-      popular: true
-    },
-    {
-      id: 'platinum',
-      name: 'Platinum Plan',
-      tier: 'Platinum',
-      minAmount: 501,
-      maxAmount: 5000,
-      percentage: 15,
-      color: '#E5E4E2',
-      description: 'Elite plan for high-value investors',
-      features: [
-        '15% Monthly Returns',
-        'Minimum $501 Investment',
-        'Maximum $5000 Investment',
-        'Dedicated Support Team',
-        'Custom Investment Strategy',
-        'Real-time Market Alerts',
-        'Exclusive Investment Opportunities'
-      ]
-    },
-    {
-      id: 'diamond',
-      name: 'Diamond Plan',
-      tier: 'Diamond',
-      minAmount: 5001,
-      maxAmount: 0, // No upper limit
-      percentage: 20,
-      color: '#B9F2FF',
-      description: 'Ultimate plan for maximum returns',
-      features: [
-        '20% Monthly Returns',
-        'Minimum $5001 Investment',
-        'No Maximum Limit',
-        'White-glove Service',
-        'Private Investment Consultations',
-        'Exclusive Market Access',
-        'Priority Withdrawal Processing',
-        'Custom Portfolio Management'
-      ]
-    }
-  ];
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadPlans = async () => {
+      try {
+        setIsLoading(true);
+        setErrorMessage(null);
+        const json: unknown = await api.getPlans(undefined, controller.signal);
+        // Support either { data: [...] } or direct array
+        const raw = Array.isArray(json)
+          ? json
+          : (isObject(json) && Array.isArray((json as { data?: unknown }).data) ? (json as { data: unknown[] }).data : []);
+
+        const mapped: InvestmentPlan[] = (Array.isArray(raw) ? raw : [])
+          .map((item) => item as PlanApiItem)
+          .map((p) => {
+            const id = isObject(p) && (typeof p.id === 'string' || typeof p.id === 'number')
+              ? String(p.id)
+              : isObject(p) && (typeof p.tier === 'string' || typeof p.name === 'string')
+                ? String((p.tier as string) ?? (p.name as string))
+                : crypto.randomUUID();
+            const name = isObject(p) && typeof p.name === 'string'
+              ? p.name
+              : isObject(p) && typeof p.tier === 'string'
+                ? p.tier
+                : 'Plan';
+            const tier = isObject(p) && typeof p.tier === 'string' ? p.tier : name;
+            const minAmount = Number((isObject(p) && (p.minAmount ?? p.min)) ?? 0);
+            const maxAmount = Number((isObject(p) && (p.maxAmount ?? p.max)) ?? 0);
+            const percentage = Number((isObject(p) && (p.percentage ?? p.rate)) ?? 0);
+            const color = isObject(p) && typeof p.color === 'string' ? p.color : '#FFD700';
+            const features = (isObject(p) && Array.isArray(p.features) ? p.features : []) as unknown[];
+            const featureStrings = features.filter((f) => typeof f === 'string') as string[];
+            const finalFeatures = featureStrings.length > 0 ? featureStrings : [
+              `${percentage}% Monthly Returns`,
+              `Minimum $${minAmount}`,
+              `${maxAmount > 0 ? `Maximum $${maxAmount}` : 'No Maximum Limit'}`
+            ];
+            const popular = Boolean(isObject(p) ? p.popular : false);
+            const description = isObject(p) && typeof p.description === 'string'
+              ? p.description
+              : 'Attractive monthly returns with secure management';
+
+            return {
+              id,
+              name,
+              tier,
+              minAmount,
+              maxAmount,
+              percentage,
+              color,
+              features: finalFeatures,
+              popular,
+              description
+            } as InvestmentPlan;
+          });
+        setPlans(mapped);
+      } catch (err: unknown) {
+        const abort =
+          (typeof DOMException !== 'undefined' && err instanceof DOMException && err.name === 'AbortError') ||
+          (isObject(err) && 'name' in err && (err as { name?: unknown }).name === 'AbortError');
+        if (abort) {
+          // Ignore aborts caused by component unmount/refresh/strict-mode re-renders
+          return;
+        }
+        const message = isObject(err) && typeof (err as { message?: unknown }).message === 'string'
+          ? (err as { message: string }).message
+          : 'Unable to load plans';
+        setErrorMessage(message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPlans();
+    return () => controller.abort();
+  }, []);
 
   const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId);
-    const plan = investmentPlans.find(p => p.id === planId);
+    const plan = (plans ?? []).find(p => p.id === planId);
     if (plan) {
       setInvestmentAmount(plan.minAmount);
     }
@@ -132,7 +140,66 @@ export default function PlansPage() {
     return (amount * percentage) / 100;
   };
 
-  const selectedPlanData = investmentPlans.find(plan => plan.id === selectedPlan);
+  const selectedPlanData = (plans ?? []).find(plan => plan.id === selectedPlan);
+
+  const getAuthToken = () => auth.getToken() || undefined;
+
+  const min = selectedPlanData ? selectedPlanData.minAmount : 0;
+  const max = selectedPlanData ? selectedPlanData.maxAmount : 0;
+  const withinMax = max === 0 || investmentAmount <= max;
+  const canInvest = !!selectedPlanData && investmentAmount >= min && withinMax;
+
+  const toDisplayString = (value: unknown) => {
+    if (value == null) return '';
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+      return String(value);
+    }
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  };
+
+  const onInvest = async () => {
+    if (!selectedPlanData || !canInvest) return;
+    setInvestError(null);
+    setInvestSuccess(null);
+    setIsInvesting(true);
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        setInvestError('Authentication required');
+        return;
+      }
+      const payload = {
+        plan: (selectedPlanData.tier || selectedPlanData.name || '').toLowerCase(),
+        amount: investmentAmount,
+        currency: 'USDT'
+      };
+      const res: unknown = await api.createInvestment(payload, token);
+      const data = (isObject(res) && 'data' in res) ? (res as { data: unknown }).data : res;
+      setInvestSuccess({
+        reference: (isObject(data) && 'reference' in data && typeof (data as { reference?: unknown }).reference === 'string')
+          ? (data as { reference: string }).reference
+          : undefined,
+        investmentId: (isObject(data) && ('investmentId' in data || 'id' in data))
+          ? String((data as { investmentId?: unknown; id?: unknown }).investmentId ?? (data as { id?: unknown }).id)
+          : undefined
+      });
+    } catch (e: unknown) {
+      const str = isObject(e) && typeof (e as { message?: unknown }).message === 'string'
+        ? String((e as { message: string }).message)
+        : toDisplayString(e);
+      if (str && (/401/.test(str) || /unauthor/i.test(str) || /auth/i.test(str))) {
+        setInvestError('Authentication required');
+      } else {
+        setInvestError(str || 'Unable to create investment');
+      }
+    } finally {
+      setIsInvesting(false);
+    }
+  };
 
   return (
     <div className="dashboard-page container-custom">
@@ -143,6 +210,22 @@ export default function PlansPage() {
           Choose your investment tier and start earning monthly returns
         </p>
       </div>
+
+      {isLoading && (
+        <div className="card border-gold card-hover mb-4">
+          <div className="card-body text-center text-secondary">
+            Loading plans...
+          </div>
+        </div>
+      )}
+
+      {!!errorMessage && (
+        <div className="card border-gold card-hover mb-4">
+          <div className="card-body text-center">
+            <span className="text-danger">{errorMessage}</span>
+          </div>
+        </div>
+      )}
 
       {/* Stats Overview */}
       <div className="row g-4 mb-5">
@@ -184,9 +267,106 @@ export default function PlansPage() {
         </div>
       </div>
 
+      {/* Investment Form — moved to top (shows when a plan is selected) */}
+      {selectedPlanData && (
+        <div className="card border-gold card-hover mb-4">
+          <div className="card-body">
+            <h4 className="fw-bold text-white mb-4">
+              Invest in {selectedPlanData.name}
+            </h4>
+
+            {investError && (
+              <div className="alert alert-danger py-2" role="alert">
+                {investError}
+              </div>
+            )}
+            {investSuccess && (
+              <div className="alert alert-success py-2" role="alert">
+                Investment created successfully
+                {investSuccess.reference ? ` — Ref: ${toDisplayString(investSuccess.reference)}` : ''}
+              </div>
+            )}
+
+            <div className="row g-4">
+              <div className="col-md-6">
+                <div className="investment-form">
+                  <div className="mb-3">
+                    <label className="form-label text-white">Investment Amount</label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-dark-custom text-white border-light">$</span>
+                      <input
+                        type="number"
+                        className="form-control bg-dark-custom text-white border-light"
+                        value={investmentAmount}
+                        onChange={(e) => setInvestmentAmount(Number(e.target.value))}
+                        min={selectedPlanData.minAmount}
+                        max={selectedPlanData.maxAmount || undefined}
+                        step="0.01"
+                      />
+                    </div>
+                    <div className="form-text text-secondary">
+                      Range: ${selectedPlanData.minAmount.toLocaleString()} - 
+                      {selectedPlanData.maxAmount > 0 ? `$${selectedPlanData.maxAmount.toLocaleString()}` : 'No Limit'}
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label text-white">Investment Duration</label>
+                    <select className="form-select bg-dark-custom text-white border-light">
+                      <option value="30">30 Days</option>
+                      <option value="60">60 Days</option>
+                      <option value="90">90 Days</option>
+                      <option value="180">180 Days</option>
+                      <option value="365">365 Days</option>
+                    </select>
+                  </div>
+
+                  <Button variant="primary" className="w-100" disabled={!canInvest || isInvesting} onClick={onInvest}>
+                    <DollarSign size={16} className="me-2" />
+                    {isInvesting ? 'Processing...' : 'Invest Now'}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="investment-calculator">
+                  <h5 className="fw-bold text-white mb-3">Investment Calculator</h5>
+
+                  <div className="calculation-item d-flex justify-content-between mb-2">
+                    <span className="text-secondary">Investment Amount:</span>
+                    <span className="text-white">${investmentAmount.toLocaleString()}</span>
+                  </div>
+
+                  <div className="calculation-item d-flex justify-content-between mb-2">
+                    <span className="text-secondary">Monthly Return Rate:</span>
+                    <span className="text-gold">{selectedPlanData.percentage}%</span>
+                  </div>
+
+                  <div className="calculation-item d-flex justify-content-between mb-2">
+                    <span className="text-secondary">Monthly Earnings:</span>
+                    <span className="text-success fw-bold">
+                      ${(calculateReturns(investmentAmount, selectedPlanData.percentage)).toFixed(2)}
+                    </span>
+                  </div>
+
+                  <hr className="border-light my-3" />
+
+                  <div className="calculation-item d-flex justify-content-between">
+                    <span className="text-white fw-bold">Total Return (30 days):</span>
+                    <span className="text-gold fw-bold fs-5">
+                      ${(investmentAmount + (calculateReturns(investmentAmount, selectedPlanData.percentage))).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Investment Plans */}
       <div className="row g-4 mb-5">
-        {investmentPlans.map((plan) => (
+        {(plans ?? []).map((plan) => (
           <div key={plan.id} className="col-lg-4 col-md-6">
             <div 
               className={`card border-gold card-hover h-100 position-relative ${
@@ -303,94 +483,16 @@ export default function PlansPage() {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Investment Form */}
-      {selectedPlanData && (
-        <div className="card border-gold card-hover">
-          <div className="card-body">
-            <h4 className="fw-bold text-white mb-4">
-              Invest in {selectedPlanData.name}
-            </h4>
-            
-            <div className="row g-4">
-              <div className="col-md-6">
-                <div className="investment-form">
-                  <div className="mb-3">
-                    <label className="form-label text-white">Investment Amount</label>
-                    <div className="input-group">
-                      <span className="input-group-text bg-dark-custom text-white border-light">$</span>
-                      <input
-                        type="number"
-                        className="form-control bg-dark-custom text-white border-light"
-                        value={investmentAmount}
-                        onChange={(e) => setInvestmentAmount(Number(e.target.value))}
-                        min={selectedPlanData.minAmount}
-                        max={selectedPlanData.maxAmount || undefined}
-                        step="0.01"
-                      />
-                    </div>
-                    <div className="form-text text-secondary">
-                      Range: ${selectedPlanData.minAmount.toLocaleString()} - 
-                      {selectedPlanData.maxAmount > 0 ? `$${selectedPlanData.maxAmount.toLocaleString()}` : 'No Limit'}
-                    </div>
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label text-white">Investment Duration</label>
-                    <select className="form-select bg-dark-custom text-white border-light">
-                      <option value="30">30 Days</option>
-                      <option value="60">60 Days</option>
-                      <option value="90">90 Days</option>
-                      <option value="180">180 Days</option>
-                      <option value="365">365 Days</option>
-                    </select>
-                  </div>
-
-                  <Button variant="primary" className="w-100">
-                    <DollarSign size={16} className="me-2" />
-                    Invest Now
-                  </Button>
-                </div>
-              </div>
-
-              <div className="col-md-6">
-                <div className="investment-calculator">
-                  <h5 className="fw-bold text-white mb-3">Investment Calculator</h5>
-                  
-                  <div className="calculation-item d-flex justify-content-between mb-2">
-                    <span className="text-secondary">Investment Amount:</span>
-                    <span className="text-white">${investmentAmount.toLocaleString()}</span>
-                  </div>
-                  
-                  <div className="calculation-item d-flex justify-content-between mb-2">
-                    <span className="text-secondary">Monthly Return Rate:</span>
-                    <span className="text-gold">{selectedPlanData.percentage}%</span>
-                  </div>
-                  
-                  <div className="calculation-item d-flex justify-content-between mb-2">
-                    <span className="text-secondary">Monthly Earnings:</span>
-                    <span className="text-success fw-bold">
-                      ${(calculateReturns(investmentAmount, selectedPlanData.percentage)).toFixed(2)}
-                    </span>
-                  </div>
-                  
-                  
-                  
-                  <hr className="border-light my-3" />
-                  
-                  <div className="calculation-item d-flex justify-content-between">
-                    <span className="text-white fw-bold">Total Return (30 days):</span>
-                    <span className="text-gold fw-bold fs-5">
-                      ${(investmentAmount + (calculateReturns(investmentAmount, selectedPlanData.percentage))).toFixed(2)}
-                    </span>
-                  </div>
-                </div>
+        {!isLoading && !errorMessage && (plans ?? []).length === 0 && (
+          <div className="col-12">
+            <div className="card border-gold card-hover">
+              <div className="card-body text-center text-secondary">
+                No plans available.
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Terms and Conditions */}
       <div className="card border-gold card-hover mt-4">
