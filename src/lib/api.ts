@@ -423,6 +423,10 @@ export type TransactionItem = {
   description?: string;
   date: string; // ISO
   reference?: string;
+  // Optional backend variants
+  _id?: string;
+  createdAt?: string;
+  displayType?: string;
   [key: string]: unknown;
 };
 
@@ -446,6 +450,28 @@ export type ListTransactionsResult = {
   category?: string;
 };
 
+function isTransactionsEnvelope(raw: unknown): raw is {
+  success?: boolean;
+  data?: {
+    transactions?: TransactionItem[];
+    total?: number;
+    page?: number;
+    limit?: number;
+    title?: string;
+    category?: string;
+  };
+  transactions?: TransactionItem[];
+  dataArray?: TransactionItem[];
+} {
+  if (!raw || typeof raw !== 'object') return false;
+  const r = raw as Record<string, unknown>;
+  if (Array.isArray(r.data)) return true;
+  const data = r.data as Record<string, unknown> | undefined;
+  if (data && Array.isArray((data as Record<string, unknown>).transactions)) return true;
+  if (Array.isArray(r.transactions)) return true;
+  return false;
+}
+
 export async function listTransactions(params: ListTransactionsParams = {}, token?: string, signal?: AbortSignal): Promise<ListTransactionsResult> {
   const query = new URLSearchParams();
   if (typeof params.limit === 'number') query.set('limit', String(params.limit));
@@ -458,22 +484,33 @@ export async function listTransactions(params: ListTransactionsParams = {}, toke
   // 1) { data: TransactionItem[] }
   // 2) { success: true, data: { transactions: TransactionItem[], total, page, limit, title?, category? } }
   // 3) { transactions: TransactionItem[] }
-  const asAny = raw as any;
-  if (Array.isArray(asAny?.data)) {
-    return { items: asAny.data as TransactionItem[] };
-  }
-  if (asAny?.success && Array.isArray(asAny?.data?.transactions)) {
-    return {
-      items: asAny.data.transactions as TransactionItem[],
-      total: asAny.data.total,
-      page: asAny.data.page,
-      limit: asAny.data.limit,
-      title: asAny.data.title,
-      category: asAny.data.category
-    };
-  }
-  if (Array.isArray(asAny?.transactions)) {
-    return { items: asAny.transactions as TransactionItem[] };
+  if (isTransactionsEnvelope(raw)) {
+    const r = raw as Record<string, unknown>;
+    if (Array.isArray(r.data)) {
+      return { items: r.data as TransactionItem[] };
+    }
+    const data = r.data as Record<string, unknown> | undefined;
+    if (data && Array.isArray((data as Record<string, unknown>).transactions)) {
+      const d = data as {
+        transactions: TransactionItem[];
+        total?: number;
+        page?: number;
+        limit?: number;
+        title?: string;
+        category?: string;
+      };
+      return {
+        items: d.transactions,
+        total: d.total,
+        page: d.page,
+        limit: d.limit,
+        title: d.title,
+        category: d.category
+      };
+    }
+    if (Array.isArray(r.transactions)) {
+      return { items: r.transactions as TransactionItem[] };
+    }
   }
   return { items: [] };
 }
@@ -506,15 +543,21 @@ export type WalletResponse = {
   [key: string]: unknown;
 };
 
+function isWalletEnvelope(raw: unknown): raw is { success?: boolean; data?: WalletResponse } {
+  if (!raw || typeof raw !== 'object') return false;
+  const r = raw as Record<string, unknown>;
+  if ('success' in r && typeof r.success === 'boolean' && 'data' in r && typeof r.data === 'object') return true;
+  return false;
+}
+
 export async function getWallet(token?: string, signal?: AbortSignal): Promise<WalletResponse> {
   const raw = await getJson<unknown>('/api/wallet', token, signal);
-  const any = raw as any;
   // Support shapes like:
   // { totalBalance, availableBalance, currency, balances }
   // { success, data: { totalBalance, availableBalance, currency, balances } }
-  if (any?.success && any?.data) {
-    return any.data as WalletResponse;
+  if (isWalletEnvelope(raw)) {
+    return (raw as { data?: WalletResponse }).data || {};
   }
-  return any as WalletResponse;
+  return raw as WalletResponse;
 }
 

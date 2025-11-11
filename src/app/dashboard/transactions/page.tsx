@@ -6,7 +6,7 @@ import Button from '@/components/ui/Button';
 import TransactionTable, { Transaction, TransactionType, TransactionStatus } from '@/components/ui/TransactionTable';
 import '../dashboard.scss';
 import './transactions.scss';
-import api, { type TransactionItem, exportTransactionsCsv, listTransactions, type ListTransactionsResult } from '@/lib/api';
+import { type TransactionItem, exportTransactionsCsv, listTransactions, type ListTransactionsResult } from '@/lib/api';
 import auth from '@/lib/auth';
 
 // Types are now imported from TransactionTable component
@@ -20,13 +20,13 @@ export default function TransactionsPage() {
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [pageTitle, setPageTitle] = useState<string>('Wallet Transactions');
 
   const mapItemToRow = (t: TransactionItem): Transaction => ({
-    id: String((t as any)._id ?? t.id),
+    id: String(t._id ?? t.id),
     type: ((() => {
-      const dt = String((t as any).displayType ?? '').toLowerCase();
+      const dt = String(t.displayType ?? '').toLowerCase();
       // Map backend display types to table types
       if (dt === 'wallet_deposit') return 'deposit' as TransactionType;
       if (dt === 'wallet_debit') return 'withdrawal' as TransactionType;
@@ -38,7 +38,7 @@ export default function TransactionsPage() {
       return 'deposit' as TransactionType;
     })() as TransactionType),
     typeLabel: ((() => {
-      const raw = String((t as any).displayType ?? '').trim();
+      const raw = String(t.displayType ?? '').trim();
       if (!raw) return undefined;
       // Convert snake_case to Title Case
       const pretty = raw.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -53,7 +53,7 @@ export default function TransactionsPage() {
     amount: Number(t.amount ?? 0),
     currency: String(t.currency ?? 'USDT'),
     description: String(t.description ?? ''),
-    date: String((t as any).createdAt ?? t.date ?? new Date().toISOString()),
+    date: String(t.createdAt ?? t.date ?? new Date().toISOString()),
     reference: t.reference ? String(t.reference) : undefined,
   });
 
@@ -135,15 +135,7 @@ export default function TransactionsPage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  // Removed unused formatDate helper (export is handled by server)
 
   const exportTransactions = async () => {
     try {

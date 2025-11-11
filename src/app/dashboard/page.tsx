@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import PlanCard from '@/components/shared/PlanCard';
-import { Plan } from '@/types/plans';
+// import PlanCard from '@/components/shared/PlanCard';
+// import { Plan } from '@/types/plans';
 import './dashboard.scss';
 import { Wallet as WalletIcon, BarChart2, TrendingUp, CreditCard } from 'lucide-react';
 import { getUser } from '@/lib/auth';
@@ -22,7 +22,7 @@ export default function DashboardPage() {
   const [summary, setSummary] = useState<InvestmentsSummary | null>(null);
   const [activeInvestments, setActiveInvestments] = useState<InvestmentItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState('');
   const [recentActivities, setRecentActivities] = useState<ActivityItem[]>([]);
 

@@ -53,7 +53,7 @@ export default function WalletPage() {
           USDT: Number(b.USDT ?? b.usdt ?? total ?? 0),
         };
         setBalances(next);
-      } catch (e) {
+      } catch {
         // ignore, keep defaults
       }
     })();

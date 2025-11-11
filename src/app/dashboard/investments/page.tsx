@@ -57,7 +57,7 @@ export default function InvestmentsPage() {
   };
 
   useEffect(() => {
-    let abort = new AbortController();
+    const abort = new AbortController();
     const run = async () => {
       setIsLoading(true);
       setError(null);
@@ -147,7 +147,7 @@ export default function InvestmentsPage() {
       activeCount: activeInvestments.length,
       totalCount: investments.length
     };
-  }, [investments]);
+  }, [investments, summary]);
 
   const handleExport = async () => {
     try {
