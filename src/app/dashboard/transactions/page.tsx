@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Search, Download } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import TransactionTable, { Transaction, TransactionType, TransactionStatus } from '@/components/ui/TransactionTable';
 import '../dashboard.scss';
 import './transactions.scss';
+import { type TransactionItem, exportTransactionsCsv, listTransactions, type ListTransactionsResult } from '@/lib/api';
+import auth from '@/lib/auth';
 
 // Types are now imported from TransactionTable component
 
@@ -16,89 +18,67 @@ export default function TransactionsPage() {
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'type' | 'status'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  // Sample transaction data - properly mapped for table display
-  const transactions: Transaction[] = useMemo(() => [
-    {
-      id: 'TXN-2025-001',
-      type: 'deposit',
-      status: 'completed',
-      amount: 0.25,
-      currency: 'BTC',
-      description: 'Bitcoin deposit',
-      date: '2025-01-15T10:30:00Z',
-      reference: 'DP-202510-0001'
-    },
-    {
-      id: 'TXN-2025-002',
-      type: 'investment',
-      status: 'completed',
-      amount: 1500,
-      currency: 'USDT',
-      description: 'Investment in Gold Plan',
-      date: '2025-01-14T14:20:00Z',
-      reference: 'INV-GOLD-001'
-    },
-    {
-      id: 'TXN-2025-003',
-      type: 'profit',
-      status: 'completed',
-      amount: 75,
-      currency: 'USDT',
-      description: 'Daily profit from Gold Plan',
-      date: '2025-01-13T09:15:00Z',
-      reference: 'PROFIT-001'
-    },
-    {
-      id: 'TXN-2025-004',
-      type: 'withdrawal',
-      status: 'pending',
-      amount: 200,
-      currency: 'USDT',
-      description: 'Withdrawal request',
-      date: '2025-01-12T16:45:00Z',
-      reference: 'WD-2025-001'
-    },
-    {
-      id: 'TXN-2025-005',
-      type: 'referral',
-      status: 'completed',
-      amount: 50,
-      currency: 'USDT',
-      description: 'Referral bonus',
-      date: '2025-01-11T11:30:00Z',
-      reference: 'REF-USER-123'
-    },
-    {
-      id: 'TXN-2025-006',
-      type: 'deposit',
-      status: 'processing',
-      amount: 0.5,
-      currency: 'ETH',
-      description: 'Ethereum deposit',
-      date: '2025-01-10T08:20:00Z',
-      reference: 'DP-202510-0002'
-    },
-    {
-      id: 'TXN-2025-007',
-      type: 'investment',
-      status: 'completed',
-      amount: 500,
-      currency: 'USDT',
-      description: 'Investment in Silver Plan',
-      date: '2025-01-09T13:10:00Z',
-      reference: 'INV-SILVER-001'
-    },
-    {
-      id: 'TXN-2025-008',
-      type: 'profit',
-      status: 'completed',
-      amount: 25,
-      currency: 'USDT',
-      description: 'Daily profit from Silver Plan',
-      date: '2025-01-08T09:00:00Z',
-      reference: 'PROFIT-002'
-    }
-  ], []);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [, setError] = useState<string | null>(null);
+  const [pageTitle, setPageTitle] = useState<string>('Wallet Transactions');
+
+  const mapItemToRow = (t: TransactionItem): Transaction => ({
+    id: String(t._id ?? t.id),
+    type: ((() => {
+      const dt = String(t.displayType ?? '').toLowerCase();
+      // Map backend display types to table types
+      if (dt === 'wallet_deposit') return 'deposit' as TransactionType;
+      if (dt === 'wallet_debit') return 'withdrawal' as TransactionType;
+      // Fallback to raw type if compatible
+      const ty = String(t.type ?? '').toLowerCase();
+      if (ty === 'deposit' || ty === 'withdrawal' || ty === 'investment' || ty === 'profit' || ty === 'referral') {
+        return ty as TransactionType;
+      }
+      return 'deposit' as TransactionType;
+    })() as TransactionType),
+    typeLabel: ((() => {
+      const raw = String(t.displayType ?? '').trim();
+      if (!raw) return undefined;
+      // Convert snake_case to Title Case
+      const pretty = raw.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      return pretty;
+    })() as string | undefined),
+    status: ((() => {
+      const s = String(t.status || '').toLowerCase();
+      if (s === 'confirmed') return 'completed';
+      if (s === 'processing' || s === 'pending' || s === 'failed' || s === 'completed') return s as TransactionStatus;
+      return 'pending';
+    })() as TransactionStatus),
+    amount: Number(t.amount ?? 0),
+    currency: String(t.currency ?? 'USDT'),
+    description: String(t.description ?? ''),
+    date: String(t.createdAt ?? t.date ?? new Date().toISOString()),
+    reference: t.reference ? String(t.reference) : undefined,
+  });
+
+  useEffect(() => {
+    const abort = new AbortController();
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const token = auth.getToken() || undefined;
+        const res: ListTransactionsResult = await listTransactions({ limit: 100, category: 'wallet' }, token, abort.signal);
+        setTransactions(res.items.map(mapItemToRow));
+        if (res.title) setPageTitle(res.title);
+      } catch (e: unknown) {
+        const isAbort =
+          (typeof DOMException !== 'undefined' && e instanceof DOMException && e.name === 'AbortError') ||
+          (typeof e === 'object' && e !== null && 'name' in e && (e as { name?: unknown }).name === 'AbortError');
+        if (!isAbort) setError(e instanceof Error ? e.message : 'Failed to load transactions');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+    return () => abort.abort();
+  }, []);
 
   // Filter and sort transactions
   const filteredTransactions = useMemo(() => {
@@ -155,38 +135,22 @@ export default function TransactionsPage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  // Removed unused formatDate helper (export is handled by server)
 
-  const exportTransactions = () => {
-    const csvContent = [
-      ['ID', 'Type', 'Status', 'Amount', 'Currency', 'Description', 'Date', 'Reference'],
-      ...filteredTransactions.map(t => [
-        t.id,
-        t.type,
-        t.status,
-        t.amount.toString(),
-        t.currency,
-        t.description,
-        formatDate(t.date),
-        t.reference || ''
-      ])
-    ].map(row => row.join(',')).join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `transactions-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+  const exportTransactions = async () => {
+    try {
+      const blob = await exportTransactionsCsv(auth.getToken() || undefined);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `transactions-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      alert('Failed to export transactions');
+    }
   };
 
   return (
@@ -194,8 +158,8 @@ export default function TransactionsPage() {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h1 className="h3 fw-bold text-gold mb-1">Transaction History</h1>
-          <p className="text-secondary mb-0">View and manage your transaction history</p>
+          <h1 className="h3 fw-bold text-gold mb-1">{pageTitle}</h1>
+          <p className="text-secondary mb-0">View and manage your wallet transaction history</p>
         </div>
         <Button 
           variant="outline" 
@@ -331,6 +295,7 @@ export default function TransactionsPage() {
           <div className="card-body p-0">
             <TransactionTable
               transactions={filteredTransactions}
+              loading={loading}
               onSort={handleSort}
               sortColumn={sortBy}
               sortDirection={sortOrder}

@@ -264,7 +264,300 @@ export async function createInvestment(req: CreateInvestmentRequest, token?: str
   return postJson<CreateInvestmentRequest, CreateInvestmentResponse>('/api/investments', req, token);
 }
 
-const api = { login, register, sendOTP, verifyOTP, logout, getPlans, createInvestment };
+// Investments - Listing/Details/Mutations/Summary/Export
+export type ListInvestmentsParams = {
+  status?: 'all' | 'active' | 'completed' | 'pending' | 'cancelled';
+  sortBy?: 'startDate' | 'amount' | 'planName' | 'status';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  pageSize?: number;
+};
+
+export type InvestmentItem = {
+  id: string;
+  planName: string;
+  planTier?: string;
+  amount: number;
+  currency: string;
+  startDate: string;
+  endDate?: string;
+  status: 'active' | 'completed' | 'pending' | 'cancelled';
+  dailyReturn?: number;
+  totalEarnings?: number;
+  expectedReturn?: number;
+  planPercentage?: number;
+  daysRemaining?: number;
+  nextPayout?: string;
+  [key: string]: unknown;
+};
+
+export type ListInvestmentsResponse = {
+  data: InvestmentItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+};
+
+export async function listInvestments(params: ListInvestmentsParams = {}, token?: string, signal?: AbortSignal): Promise<ListInvestmentsResponse> {
+  const query = new URLSearchParams();
+  if (params.status) query.set('status', params.status);
+  if (params.sortBy) query.set('sortBy', params.sortBy);
+  if (params.sortOrder) query.set('sortOrder', params.sortOrder);
+  if (typeof params.page === 'number') query.set('page', String(params.page));
+  if (typeof params.pageSize === 'number') query.set('pageSize', String(params.pageSize));
+  const qs = query.toString();
+  const path = `/api/investments${qs ? `?${qs}` : ''}`;
+  return getJson<ListInvestmentsResponse>(path, token, signal);
+}
+
+export async function getInvestmentById(investmentId: string, token?: string, signal?: AbortSignal): Promise<InvestmentItem> {
+  return getJson<InvestmentItem>(`/api/investments/${encodeURIComponent(investmentId)}`, token, signal);
+}
+
+export type PatchInvestmentRequest = {
+  action: 'pause' | 'resume';
+};
+
+export type PatchInvestmentResponse = {
+  message?: string;
+  investment?: InvestmentItem;
+  [key: string]: unknown;
+};
+
+export async function patchInvestment(investmentId: string, body: PatchInvestmentRequest, token?: string): Promise<PatchInvestmentResponse> {
+  return postJson<PatchInvestmentRequest, PatchInvestmentResponse>(`/api/investments/${encodeURIComponent(investmentId)}`, body, token);
+}
+
+export type InvestmentsSummary = {
+  totalInvested?: number;
+  totalEarnings?: number;
+  monthlyEarnings?: number;
+  activeCount?: number;
+  totalCount?: number;
+  [key: string]: unknown;
+};
+
+export async function getInvestmentsSummary(token?: string, signal?: AbortSignal): Promise<InvestmentsSummary> {
+  return getJson<InvestmentsSummary>('/api/investments/summary', token, signal);
+}
+
+export type ExportFormat = 'csv' | 'xlsx';
+
+export async function exportInvestments(format: ExportFormat = 'csv', filters: Omit<ListInvestmentsParams, 'page' | 'pageSize'> = {}, token?: string): Promise<Blob> {
+  const isBrowser = typeof window !== 'undefined';
+  const base = getBaseUrl();
+  const query = new URLSearchParams();
+  query.set('format', format);
+  if (filters.status) query.set('status', filters.status);
+  if (filters.sortBy) query.set('sortBy', filters.sortBy);
+  if (filters.sortOrder) query.set('sortOrder', filters.sortOrder);
+  const qs = query.toString();
+  const path = `/api/investments/export${qs ? `?${qs}` : ''}`;
+  const url = base ? `${base}${path}` : (isBrowser ? path : `${base}${path}`);
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(url, { headers });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(text || `Failed to export investments (${res.status})`);
+  }
+  return await res.blob();
+}
+
+const api = {
+  login,
+  register,
+  sendOTP,
+  verifyOTP,
+  logout,
+  getPlans,
+  createInvestment,
+  listInvestments,
+  getInvestmentById,
+  patchInvestment,
+  getInvestmentsSummary,
+  exportInvestments
+};
 
 export default api;
+
+// --- Optional: Activities feed (if backend provides it) ---
+export type ActivityItem = {
+  id: string;
+  type: string;
+  title?: string;
+  description?: string;
+  amount?: number;
+  currency?: string;
+  createdAt: string;
+  metadata?: Record<string, unknown>;
+};
+
+export type ListActivitiesResponse = {
+  data: ActivityItem[];
+  total?: number;
+};
+
+export async function getRecentActivities(limit = 5, token?: string, signal?: AbortSignal): Promise<ActivityItem[]> {
+  try {
+    const query = new URLSearchParams();
+    query.set('limit', String(limit));
+    const res = await getJson<ListActivitiesResponse>(`/api/activities?${query.toString()}`, token, signal);
+    return res?.data ?? [];
+  } catch {
+    // If the endpoint isn't available, return empty list to avoid breaking UI
+    return [];
+  }
+}
+
+// --- Transactions ---
+export type TransactionType = 'deposit' | 'withdrawal' | 'investment' | 'profit' | 'referral' | string;
+export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'processing' | string;
+
+export type TransactionItem = {
+  id: string;
+  type: TransactionType;
+  status: TransactionStatus;
+  amount: number;
+  currency: string;
+  description?: string;
+  date: string; // ISO
+  reference?: string;
+  // Optional backend variants
+  _id?: string;
+  createdAt?: string;
+  displayType?: string;
+  [key: string]: unknown;
+};
+
+export type ListTransactionsResponse = {
+  data: TransactionItem[];
+  total?: number;
+};
+
+export type ListTransactionsParams = {
+  limit?: number;
+  page?: number;
+  category?: string; // e.g., 'wallet'
+};
+
+export type ListTransactionsResult = {
+  items: TransactionItem[];
+  total?: number;
+  page?: number;
+  limit?: number;
+  title?: string;
+  category?: string;
+};
+
+function isTransactionsEnvelope(raw: unknown): raw is {
+  success?: boolean;
+  data?: {
+    transactions?: TransactionItem[];
+    total?: number;
+    page?: number;
+    limit?: number;
+    title?: string;
+    category?: string;
+  };
+  transactions?: TransactionItem[];
+  dataArray?: TransactionItem[];
+} {
+  if (!raw || typeof raw !== 'object') return false;
+  const r = raw as Record<string, unknown>;
+  if (Array.isArray(r.data)) return true;
+  const data = r.data as Record<string, unknown> | undefined;
+  if (data && Array.isArray((data as Record<string, unknown>).transactions)) return true;
+  if (Array.isArray(r.transactions)) return true;
+  return false;
+}
+
+export async function listTransactions(params: ListTransactionsParams = {}, token?: string, signal?: AbortSignal): Promise<ListTransactionsResult> {
+  const query = new URLSearchParams();
+  if (typeof params.limit === 'number') query.set('limit', String(params.limit));
+  if (typeof params.page === 'number') query.set('page', String(params.page));
+  if (params.category) query.set('category', params.category);
+
+  const raw = await getJson<unknown>(`/api/transactions?${query.toString()}`, token, signal);
+
+  // Support multiple backend response shapes:
+  // 1) { data: TransactionItem[] }
+  // 2) { success: true, data: { transactions: TransactionItem[], total, page, limit, title?, category? } }
+  // 3) { transactions: TransactionItem[] }
+  if (isTransactionsEnvelope(raw)) {
+    const r = raw as Record<string, unknown>;
+    if (Array.isArray(r.data)) {
+      return { items: r.data as TransactionItem[] };
+    }
+    const data = r.data as Record<string, unknown> | undefined;
+    if (data && Array.isArray((data as Record<string, unknown>).transactions)) {
+      const d = data as {
+        transactions: TransactionItem[];
+        total?: number;
+        page?: number;
+        limit?: number;
+        title?: string;
+        category?: string;
+      };
+      return {
+        items: d.transactions,
+        total: d.total,
+        page: d.page,
+        limit: d.limit,
+        title: d.title,
+        category: d.category
+      };
+    }
+    if (Array.isArray(r.transactions)) {
+      return { items: r.transactions as TransactionItem[] };
+    }
+  }
+  return { items: [] };
+}
+
+export async function getTransactionById(transactionId: string, token?: string, signal?: AbortSignal): Promise<TransactionItem> {
+  return getJson<TransactionItem>(`/api/transactions/${encodeURIComponent(transactionId)}`, token, signal);
+}
+
+export async function exportTransactionsCsv(token?: string): Promise<Blob> {
+  const isBrowser = typeof window !== 'undefined';
+  const base = getBaseUrl();
+  const path = '/api/transactions/export';
+  const url = base ? `${base}${path}` : (isBrowser ? path : `${base}${path}`);
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(url, { headers });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(text || `Failed to export transactions (${res.status})`);
+  }
+  return await res.blob();
+}
+
+// --- Wallet ---
+export type WalletResponse = {
+  totalBalance?: number;
+  availableBalance?: number;
+  currency?: string;
+  balances?: Record<string, number>;
+  [key: string]: unknown;
+};
+
+function isWalletEnvelope(raw: unknown): raw is { success?: boolean; data?: WalletResponse } {
+  if (!raw || typeof raw !== 'object') return false;
+  const r = raw as Record<string, unknown>;
+  if ('success' in r && typeof r.success === 'boolean' && 'data' in r && typeof r.data === 'object') return true;
+  return false;
+}
+
+export async function getWallet(token?: string, signal?: AbortSignal): Promise<WalletResponse> {
+  const raw = await getJson<unknown>('/api/wallet', token, signal);
+  // Support shapes like:
+  // { totalBalance, availableBalance, currency, balances }
+  // { success, data: { totalBalance, availableBalance, currency, balances } }
+  if (isWalletEnvelope(raw)) {
+    return (raw as { data?: WalletResponse }).data || {};
+  }
+  return raw as WalletResponse;
+}
 

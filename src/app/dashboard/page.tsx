@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import PlanCard from '@/components/shared/PlanCard';
-import { Plan } from '@/types/plans';
+// import PlanCard from '@/components/shared/PlanCard';
+// import { Plan } from '@/types/plans';
 import './dashboard.scss';
 import { Wallet as WalletIcon, BarChart2, TrendingUp, CreditCard } from 'lucide-react';
 import { getUser } from '@/lib/auth';
+import auth from '@/lib/auth';
+import api, { type InvestmentsSummary, type InvestmentItem, type ActivityItem, getRecentActivities } from '@/lib/api';
 
 type StoredUser = {
   id?: string;
@@ -16,44 +18,49 @@ type StoredUser = {
   lastName?: string;
 };
 
-// Mock data - replace with API call
-const mockPlans: Plan[] = [
-  {
-    id: '1',
-    name: 'Starter Plan',
-    description: 'Perfect for beginners',
-    minAmount: 100,
-    maxAmount: 999,
-    roi: 5,
-    duration: 7,
-    features: ['Daily Returns', '24/7 Support', 'Instant Withdrawal'],
-  },
-  {
-    id: '2',
-    name: 'Professional Plan',
-    description: 'For experienced investors',
-    minAmount: 1000,
-    maxAmount: 4999,
-    roi: 10,
-    duration: 14,
-    features: ['Daily Returns', 'Priority Support', 'Instant Withdrawal', 'Bonus Rewards'],
-  },
-];
-
 export default function DashboardPage() {
-  const [stats] = useState({
-    totalInvestment: 5000,
-    activeInvestments: 3,
-    totalEarnings: 750,
-    availableBalance: 1250,
-  });
+  const [summary, setSummary] = useState<InvestmentsSummary | null>(null);
+  const [activeInvestments, setActiveInvestments] = useState<InvestmentItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [, setError] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState('');
+  const [recentActivities, setRecentActivities] = useState<ActivityItem[]>([]);
 
   // Read user from web storage only after the component mounts on the client
   useEffect(() => {
     const user = getUser() as StoredUser | null;
     const name = (user && (user.fullName || user.name || user.email)) || '';
     setDisplayName(name);
+  }, []);
+
+  useEffect(() => {
+    const abort = new AbortController();
+    const load = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const token = auth.getToken() || undefined;
+        const [s, list, activities] = await Promise.all([
+          api.getInvestmentsSummary(token, abort.signal).catch(() => null),
+          api.listInvestments({ status: 'active', sortBy: 'startDate', sortOrder: 'desc', page: 1, pageSize: 6 }, token, abort.signal),
+          getRecentActivities(5, token, abort.signal)
+        ]);
+        if (s) setSummary(s);
+        setActiveInvestments(list?.data ?? []);
+        setRecentActivities(activities ?? []);
+      } catch (e: unknown) {
+        const isAbort =
+          (typeof DOMException !== 'undefined' && e instanceof DOMException && e.name === 'AbortError') ||
+          (typeof e === 'object' && e !== null && 'name' in e && (e as { name?: unknown }).name === 'AbortError');
+        if (!isAbort) {
+          setError(e instanceof Error ? e.message : 'Failed to load dashboard data');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
+    return () => abort.abort();
   }, []);
 
   return (
@@ -73,7 +80,7 @@ export default function DashboardPage() {
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-secondary mb-1 small">Total Investment</p>
-                  <h3 className="fw-bold mb-0 text-gold">${stats.totalInvestment.toLocaleString()}</h3>
+                  <h3 className="fw-bold mb-0 text-gold">${Number(summary?.totalInvested ?? 0).toLocaleString()}</h3>
                 </div>
                 <div className="text-gold">
                   <WalletIcon size={28} />
@@ -89,7 +96,7 @@ export default function DashboardPage() {
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-secondary mb-1 small">Active Investments</p>
-                  <h3 className="fw-bold mb-0">{stats.activeInvestments}</h3>
+                  <h3 className="fw-bold mb-0">{Number(summary?.activeCount ?? activeInvestments.length)}</h3>
                 </div>
                 <div className="text-gold">
                   <BarChart2 size={28} />
@@ -106,7 +113,7 @@ export default function DashboardPage() {
                 <div>
                   <p className="text-secondary mb-1 small">Total Earnings</p>
                   <h3 className="fw-bold mb-0 text-gold">
-                    +${stats.totalEarnings.toLocaleString()}
+                    +${Number(summary?.totalEarnings ?? 0).toLocaleString()}
                   </h3>
                 </div>
                 <div className="text-gold">
@@ -123,7 +130,7 @@ export default function DashboardPage() {
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-secondary mb-1 small">Available Balance</p>
-                  <h3 className="fw-bold mb-0">${stats.availableBalance.toLocaleString()}</h3>
+                  <h3 className="fw-bold mb-0">${(0).toLocaleString()}</h3>
                 </div>
                 <div className="text-gold">
                   <CreditCard size={28} />
@@ -134,14 +141,45 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Investment Plans */}
+      {/* Active Plans (purchased) */}
       <div className="mb-4">
-        <h2 className="h4 fw-bold mb-3 text-gold">Available Investment Plans</h2>
+        <h2 className="h4 fw-bold mb-3 text-gold">Active Plans</h2>
       </div>
       <div className="row g-4">
-        {mockPlans.map((plan) => (
-          <div key={plan.id} className="col-md-6 col-lg-4">
-            <PlanCard plan={plan} />
+        {activeInvestments.length === 0 && !isLoading && (
+          <div className="col-12">
+            <div className="alert alert-secondary">You have no active plans yet.</div>
+          </div>
+        )}
+        {activeInvestments.map((inv) => (
+          <div key={inv.id} className="col-md-6 col-lg-4">
+            <div className="card border-gold card-hover h-100">
+              <div className="card-body">
+                <div className="d-flex justify-content-between align-items-start mb-2">
+                  <h5 className="fw-bold text-white mb-0">{inv.planName}</h5>
+                  <span className="badge bg-success">Active</span>
+                </div>
+                <div className="text-secondary small mb-3">
+                  Started: {new Date(inv.startDate).toLocaleDateString()}
+                </div>
+                <div className="d-flex justify-content-between mb-2">
+                  <span className="text-secondary">Amount</span>
+                  <span className="fw-bold text-gold">
+                    {Number(inv.amount).toLocaleString()} {inv.currency || 'USDT'}
+                  </span>
+                </div>
+                <div className="d-flex justify-content-between mb-2">
+                  <span className="text-secondary">Monthly %</span>
+                  <span className="fw-bold">{Number(inv.planPercentage ?? 0)}%</span>
+                </div>
+                <div className="d-flex justify-content-between">
+                  <span className="text-secondary">Total Earnings</span>
+                  <span className="fw-bold text-success">
+                    {Number(inv.totalEarnings ?? 0).toLocaleString()} {inv.currency || 'USDT'}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>
@@ -151,29 +189,28 @@ export default function DashboardPage() {
         <h2 className="h4 fw-bold mb-3 text-gold">Recent Activity</h2>
         <div className="card border-gold card-hover">
           <div className="card-body">
-            <div className="list-group list-group-flush">
-              <div className="list-group-item d-flex justify-content-between align-items-center px-0">
-                <div>
-                  <h6 className="mb-1">Investment in Professional Plan</h6>
-                  <small className="text-secondary">2 days ago</small>
-                </div>
-                <span className="badge badge-custom" style={{ backgroundColor: 'rgba(212, 175, 55, 0.15)', color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.35)' }}>+$100</span>
+            {recentActivities.length === 0 ? (
+              <div className="text-secondary">No recent activity.</div>
+            ) : (
+              <div className="list-group list-group-flush">
+                {recentActivities.map((a) => (
+                  <div key={a.id} className="list-group-item d-flex justify-content-between align-items-center px-0">
+                    <div>
+                      <h6 className="mb-1">{a.title || a.type}</h6>
+                      <small className="text-secondary">{new Date(a.createdAt).toLocaleString()}</small>
+                    </div>
+                    {typeof a.amount === 'number' && (
+                      <span
+                        className="badge badge-custom"
+                        style={{ backgroundColor: 'rgba(212, 175, 55, 0.15)', color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.35)' }}
+                      >
+                        {(a.amount >= 0 ? '+' : '')}{Math.abs(a.amount).toLocaleString()} {a.currency || ''}
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
-              <div className="list-group-item d-flex justify-content-between align-items-center px-0">
-                <div>
-                  <h6 className="mb-1">Withdrawal Completed</h6>
-                  <small className="text-secondary">5 days ago</small>
-                </div>
-                <span className="badge badge-custom" style={{ backgroundColor: 'rgba(212, 175, 55, 0.15)', color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.35)' }}>$500</span>
-              </div>
-              <div className="list-group-item d-flex justify-content-between align-items-center px-0">
-                <div>
-                  <h6 className="mb-1">Investment in Starter Plan</h6>
-                  <small className="text-secondary">1 week ago</small>
-                </div>
-                <span className="badge badge-custom" style={{ backgroundColor: 'rgba(212, 175, 55, 0.15)', color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.35)' }}>+$50</span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

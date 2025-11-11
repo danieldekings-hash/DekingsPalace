@@ -6,6 +6,8 @@ import Button from '@/components/ui/Button';
 import '../dashboard.scss';
 import './wallet.scss';
 import { getUser } from '@/lib/auth';
+import auth from '@/lib/auth';
+import { getWallet } from '@/lib/api';
 
 type Currency = 'BTC' | 'ETH' | 'USDT';
 
@@ -14,6 +16,7 @@ export default function WalletPage() {
   const [amount, setAmount] = useState('');
   const [copied, setCopied] = useState(false);
   const [balances, setBalances] = useState<Record<Currency, number>>({ BTC: 0.0, ETH: 0.0, USDT: 0.0 });
+  const [totalUsdt, setTotalUsdt] = useState<number>(0);
   const [deposits] = useState<Array<{ id: string; currency: Currency; amount: number; date: string }>>([
     { id: 'DP-202510-0001', currency: 'BTC', amount: 0.25, date: '2025-10-01' },
     { id: 'DP-202510-0002', currency: 'USDT', amount: 1500, date: '2025-10-10' },
@@ -28,15 +31,33 @@ export default function WalletPage() {
     return `${btoa(base).replace(/[^A-Za-z0-9]/g, '').slice(0, 20)}`;
   }, [currency, userAddressSeed]);
 
-  // On mount: set user seed and recompute balances from deposits
+  // On mount: set user seed and fetch wallet balance
   useEffect(() => {
     const u = getUser() as { id?: string; email?: string; fullName?: string } | null;
     const seed = (u && (u.id || u.email || u.fullName)) || 'guest';
     setUserAddressSeed(seed);
-    // Aggregate deposits to balances
-    const next: Record<Currency, number> = { BTC: 0, ETH: 0, USDT: 0 };
-    deposits.forEach(d => { next[d.currency] += d.amount; });
-    setBalances(next);
+
+    const abort = new AbortController();
+    (async () => {
+      try {
+        const token = auth.getToken() || undefined;
+        const w = await getWallet(token, abort.signal);
+        // Prefer availableBalance or totalBalance if provided
+        const total = Number((w.availableBalance ?? w.totalBalance ?? 0) as number);
+        if (!Number.isNaN(total)) setTotalUsdt(total);
+        // If detailed balances present, map known currencies
+        const b = (w.balances || {}) as Record<string, number>;
+        const next: Record<Currency, number> = {
+          BTC: Number(b.BTC ?? b.btc ?? 0),
+          ETH: Number(b.ETH ?? b.eth ?? 0),
+          USDT: Number(b.USDT ?? b.usdt ?? total ?? 0),
+        };
+        setBalances(next);
+      } catch {
+        // ignore, keep defaults
+      }
+    })();
+    return () => abort.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -59,7 +80,7 @@ export default function WalletPage() {
           <div>
             <p className="mb-1 fw-bold h5">Available Balance</p>
             <h3 className="fw-bold mb-0">
-              {balances.USDT.toLocaleString(undefined, { maximumFractionDigits: 2 })} USDT
+              {(totalUsdt || balances.USDT).toLocaleString(undefined, { maximumFractionDigits: 2 })} USDT
             </h3>
           </div>
         </div>
