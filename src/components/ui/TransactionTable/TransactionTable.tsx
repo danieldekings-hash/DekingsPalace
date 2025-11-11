@@ -10,6 +10,7 @@ export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'processing
 export interface Transaction {
   id: string;
   type: TransactionType;
+  typeLabel?: string;
   status: TransactionStatus;
   amount: number;
   currency: string;
@@ -169,7 +170,7 @@ export default function TransactionTable({
                   </td>
                   <td>
                     <span className="text-white fw-medium">
-                      {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
+                      {transaction.typeLabel ?? (transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1))}
                     </span>
                   </td>
                   <td>
