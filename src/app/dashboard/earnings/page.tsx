@@ -6,8 +6,33 @@ import Button from '@/components/ui/Button';
 import Table, { TableColumn } from '@/components/ui/Table/Table';
 import '../dashboard.scss';
 import './earnings.scss';
-import auth from '@/lib/auth';
-import { getEarningsSummary, listEarnings, type EarningsItem, type EarningsSummary, withdrawEarnings, type WithdrawEarningsRequest, getEarningsToday } from '@/lib/api';
+
+// Mock data types
+type EarningsItem = {
+  id: string;
+  type: 'investment_earning' | 'referral_bonus' | string;
+  amount: number;
+  currency: string;
+  isWithdrawn?: boolean;
+  date: string;
+  withdrawableDate?: string;
+  description?: string;
+  _id?: string;
+  createdAt?: string;
+  [key: string]: unknown;
+};
+
+type EarningsSummary = {
+  totalEarnings?: number;
+  withdrawnAmount?: number;
+  availableAmount?: number;
+  investmentEarnings?: number;
+  referralBonuses?: number;
+  withdrawableAmount?: number;
+  currency?: string;
+  pendingAmount?: number;
+  [key: string]: unknown;
+};
 
 function prettyType(t: string) {
   const raw = String(t || '').replace(/_/g, ' ').trim();
@@ -38,52 +63,164 @@ export default function EarningsPage() {
   const [walletAddress, setWalletAddress] = useState('');
   const [withdrawing, setWithdrawing] = useState(false);
 
-  const load = async (signal?: AbortSignal) => {
+  // Mock data
+  const mockSummary: EarningsSummary = {
+    totalEarnings: 15.24,
+    withdrawnAmount: 0,
+    availableAmount: 15.24,
+    investmentEarnings: 3.99,
+    referralBonuses: 11.25,
+    withdrawableAmount: 0,
+    pendingAmount: 15.24,
+    currency: 'USDT'
+  };
+
+  const mockToday = {
+    investment_earning: 2.51,
+    referral_bonus: 9.0,
+    total: 11.51,
+    currency: 'USDT'
+  };
+
+  const mockItems: EarningsItem[] = [
+    {
+      id: '69145fc221eab2ec4a64e8fd',
+      type: 'referral_bonus',
+      amount: 9,
+      currency: 'USDT',
+      date: '2025-11-12T10:21:54.309Z',
+      withdrawableDate: '2025-12-12T10:21:54.309Z',
+      isWithdrawn: false,
+      description: 'Referral bonus from Faith Okibe'
+    },
+    {
+      id: '69145309fc3ebd5b2318622d',
+      type: 'referral_bonus',
+      amount: 2.25,
+      currency: 'USDT',
+      date: '2025-11-12T09:27:37.039Z',
+      withdrawableDate: '2025-12-12T09:27:37.039Z',
+      isWithdrawn: false,
+      description: 'Referral bonus from Blessing Taupyen'
+    },
+    {
+      id: '69144c26b90e3dada75ba643',
+      type: 'investment_earning',
+      amount: 0.67,
+      currency: 'USDT',
+      date: '2025-11-12T00:00:00.000Z',
+      withdrawableDate: '2025-12-12T00:00:00.000Z',
+      isWithdrawn: false,
+      description: 'Investment earning from gold plan'
+    },
+    {
+      id: '69144c26b90e3dada75ba644',
+      type: 'investment_earning',
+      amount: 0.03,
+      currency: 'USDT',
+      date: '2025-11-12T00:00:00.000Z',
+      withdrawableDate: '2025-12-12T00:00:00.000Z',
+      isWithdrawn: false,
+      description: 'Investment earning from bronze plan'
+    },
+    {
+      id: '6914d34a5dda40c3b22acad6',
+      type: 'investment_earning',
+      amount: 0.05,
+      currency: 'USDT',
+      date: '2025-11-12T00:00:00.000Z',
+      withdrawableDate: '2025-12-12T00:00:00.000Z',
+      isWithdrawn: false,
+      description: 'Investment earning from bronze plan'
+    },
+    {
+      id: '6914d34a5dda40c3b22acad7',
+      type: 'investment_earning',
+      amount: 2.51,
+      currency: 'USDT',
+      date: '2025-11-12T00:00:00.000Z',
+      withdrawableDate: '2025-12-12T00:00:00.000Z',
+      isWithdrawn: false,
+      description: 'Investment earning from platinum plan'
+    },
+    {
+      id: '6914d34a5dda40c3b22acad8',
+      type: 'investment_earning',
+      amount: 0.03,
+      currency: 'USDT',
+      date: '2025-11-12T00:00:00.000Z',
+      withdrawableDate: '2025-12-12T00:00:00.000Z',
+      isWithdrawn: false,
+      description: 'Investment earning from bronze plan'
+    },
+    {
+      id: '69144c4db90e3dada75ba645',
+      type: 'investment_earning',
+      amount: 0.67,
+      currency: 'USDT',
+      date: '2025-11-11T00:00:00.000Z',
+      withdrawableDate: '2025-12-11T00:00:00.000Z',
+      isWithdrawn: false,
+      description: 'Investment earning from gold plan'
+    },
+    {
+      id: '69144c4db90e3dada75ba646',
+      type: 'investment_earning',
+      amount: 0.03,
+      currency: 'USDT',
+      date: '2025-11-11T00:00:00.000Z',
+      withdrawableDate: '2025-12-11T00:00:00.000Z',
+      isWithdrawn: false,
+      description: 'Investment earning from bronze plan'
+    }
+  ];
+
+  const load = () => {
     setLoading(true);
     setError(null);
-    try {
-      const token = auth.getToken() || undefined;
-      // eslint-disable-next-line no-console
-      console.debug('EarningsPage load() token?', Boolean(token));
-      const [sum, list, todayRes] = await Promise.all([
-        getEarningsSummary(token, signal),
-        listEarnings({ type: filterType, isWithdrawn: filterWithdrawn === 'all' ? undefined : filterWithdrawn === 'true', sortBy, sortOrder, page: 1, pageSize: 200 }, token, signal),
-        getEarningsToday(token, signal).catch(() => null)
-      ]);
-      setSummary(sum || null);
-      setItems(list.items || []);
-      if (todayRes) setToday(todayRes);
-      // eslint-disable-next-line no-console
-      console.debug('EarningsPage loaded:', { summary: sum, items: (list.items || []).length, today: todayRes });
-    } catch (e: unknown) {
-      const isAbort = (typeof DOMException !== 'undefined' && e instanceof DOMException && e.name === 'AbortError') ||
-        (typeof e === 'object' && e !== null && 'name' in e && (e as { name?: unknown }).name === 'AbortError');
-      if (!isAbort) {
-        const msg = e instanceof Error ? e.message : 'Failed to load earnings';
-        setError(msg);
-        // eslint-disable-next-line no-console
-        console.error('EarningsPage load error:', e);
-      }
-    } finally {
+    
+    // Simulate API delay
+    setTimeout(() => {
+      setSummary(mockSummary);
+      setItems(mockItems);
+      setToday(mockToday);
       setLoading(false);
-    }
+    }, 500);
   };
 
   useEffect(() => {
-    const abort = new AbortController();
-    load(abort.signal);
-    return () => abort.abort();
+    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterType, filterWithdrawn, sortBy, sortOrder]);
 
   const filteredItems = useMemo(() => {
-    const filtered = items.filter(it => {
+    let filtered = items.filter(it => {
+      // Filter by type
+      if (filterType !== 'all' && it.type !== filterType) {
+        return false;
+      }
+      
+      // Filter by withdrawn status
+      if (filterWithdrawn !== 'all') {
+        const isWithdrawn = filterWithdrawn === 'true';
+        if (it.isWithdrawn !== isWithdrawn) {
+          return false;
+        }
+      }
+      
+      // Filter by search term
       const term = searchTerm.toLowerCase();
-      const matchesSearch =
-        it.id.toLowerCase().includes(term) ||
-        (it.description || '').toLowerCase().includes(term) ||
-        prettyType(it.type).toLowerCase().includes(term);
-      return matchesSearch;
+      if (term) {
+        const matchesSearch =
+          it.id.toLowerCase().includes(term) ||
+          (it.description || '').toLowerCase().includes(term) ||
+          prettyType(it.type).toLowerCase().includes(term);
+        if (!matchesSearch) {
+          return false;
+        }
+      }
+      
+      return true;
     });
 
     filtered.sort((a, b) => {
@@ -103,7 +240,7 @@ export default function EarningsPage() {
     });
 
     return filtered;
-  }, [items, searchTerm, sortBy, sortOrder]);
+  }, [items, searchTerm, filterType, filterWithdrawn, sortBy, sortOrder]);
 
   const columns: TableColumn<EarningsItem & { withdrawnLabel?: string }>[] = [
     { key: 'date', label: 'Date', sortable: true, render: (v) => new Date(String(v)).toLocaleString() },
@@ -128,7 +265,7 @@ export default function EarningsPage() {
     }
   };
 
-  const handleWithdraw = async () => {
+  const handleWithdraw = () => {
     if (!withdrawAmount || !walletAddress) {
       alert('Enter amount and wallet address');
       return;
@@ -139,19 +276,16 @@ export default function EarningsPage() {
       return;
     }
     setWithdrawing(true);
-    try {
-      const token = auth.getToken() || undefined;
-      const body: WithdrawEarningsRequest = { amount: amt, currency: withdrawCurrency, walletAddress };
-      const res = await withdrawEarnings(body, token);
-      alert(res?.message || 'Withdrawal request submitted');
+    
+    // Simulate API call
+    setTimeout(() => {
+      alert('Withdrawal request submitted (Mock)');
       setWithdrawAmount('');
       setWalletAddress('');
-      await load();
-    } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed to submit withdrawal');
-    } finally {
       setWithdrawing(false);
-    }
+      // Optionally reload data
+      // load();
+    }, 1000);
   };
 
   return (
