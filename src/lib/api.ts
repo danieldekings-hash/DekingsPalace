@@ -341,6 +341,41 @@ export async function getInvestmentsSummary(token?: string, signal?: AbortSignal
   return getJson<InvestmentsSummary>('/api/investments/summary', token, signal);
 }
 
+export type EarningsSummary = {
+  totalEarnings?: number;
+  withdrawnAmount?: number;
+  availableAmount?: number;
+  investmentEarnings?: number;
+  referralBonuses?: number;
+  withdrawableAmount?: number;
+  currency?: string;
+  pendingAmount?: number;
+  [key: string]: unknown;
+};
+
+function isEarningsEnvelope(raw: unknown): raw is { success?: boolean; data?: Record<string, unknown> } {
+  if (!raw || typeof raw !== 'object') return false;
+  const r = raw as Record<string, unknown>;
+  return 'success' in r && 'data' in r && typeof r.data === 'object';
+}
+
+export async function getEarningsSummary(token?: string, signal?: AbortSignal): Promise<EarningsSummary> {
+  const raw = await getJson<unknown>('/api/earnings/summary', token, signal);
+  const src = isEarningsEnvelope(raw) ? (raw.data as Record<string, unknown>) : (raw as Record<string, unknown>);
+  const getNum = (v: unknown): number | undefined => (typeof v === 'number' ? v : undefined);
+  const normalized: EarningsSummary = {
+    totalEarnings: getNum(src.totalEarnings),
+    withdrawnAmount: getNum((src as any).withdrawnAmount) ?? getNum((src as any).totalWithdrawn),
+    availableAmount: getNum((src as any).availableAmount) ?? getNum((src as any).totalAvailable),
+    investmentEarnings: getNum((src as any).investmentEarnings),
+    referralBonuses: getNum((src as any).referralBonuses),
+    withdrawableAmount: getNum((src as any).withdrawableAmount),
+    pendingAmount: getNum((src as any).pendingAmount),
+    currency: typeof src.currency === 'string' ? (src.currency as string) : undefined,
+  };
+  return normalized;
+}
+
 export type ExportFormat = 'csv' | 'xlsx';
 
 export async function exportInvestments(format: ExportFormat = 'csv', filters: Omit<ListInvestmentsParams, 'page' | 'pageSize'> = {}, token?: string): Promise<Blob> {
@@ -376,6 +411,7 @@ const api = {
   getInvestmentById,
   patchInvestment,
   getInvestmentsSummary,
+  getEarningsSummary,
   exportInvestments
 };
 
