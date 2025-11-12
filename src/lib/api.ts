@@ -362,24 +362,165 @@ function isEarningsEnvelope(raw: unknown): raw is { success?: boolean; data?: Re
 export async function getEarningsSummary(token?: string, signal?: AbortSignal): Promise<EarningsSummary> {
   const raw = await getJson<unknown>('/api/earnings/summary', token, signal);
   const src = isEarningsEnvelope(raw) ? (raw.data as Record<string, unknown>) : (raw as Record<string, unknown>);
+  const dbg = (typeof window !== 'undefined' && (localStorage.getItem('dkp_debug_earnings') === '1')) || process.env.NEXT_PUBLIC_DEBUG_EARNINGS === '1';
+  if (dbg) {
+    // eslint-disable-next-line no-console
+    console.debug('EarningsSummary raw:', raw);
+  }
   const pickNum = (o: Record<string, unknown>, keys: string[]): number | undefined => {
     for (const k of keys) {
       const v = o[k];
       if (typeof v === 'number') return v;
+      if (typeof v === 'string') {
+        const n = Number(v.replace?.(/,/g, '') ?? v);
+        if (!Number.isNaN(n)) return n;
+      }
     }
     return undefined;
   };
   const normalized: EarningsSummary = {
-    totalEarnings: pickNum(src, ['totalEarnings']),
-    withdrawnAmount: pickNum(src, ['withdrawnAmount', 'totalWithdrawn']),
-    availableAmount: pickNum(src, ['availableAmount', 'totalAvailable']),
-    investmentEarnings: pickNum(src, ['investmentEarnings']),
-    referralBonuses: pickNum(src, ['referralBonuses']),
-    withdrawableAmount: pickNum(src, ['withdrawableAmount']),
-    pendingAmount: pickNum(src, ['pendingAmount']),
+    totalEarnings: pickNum(src, ['totalEarnings', 'total_earnings', 'total', 'sum', 'overall']),
+    withdrawnAmount: pickNum(src, ['withdrawnAmount', 'totalWithdrawn', 'withdrawn', 'withdrawn_sum']),
+    availableAmount: pickNum(src, ['availableAmount', 'totalAvailable', 'available', 'available_sum', 'balance', 'remaining']),
+    investmentEarnings: pickNum(src, ['investmentEarnings', 'investment', 'investment_earning', 'investmentEarning']),
+    referralBonuses: pickNum(src, ['referralBonuses', 'referral_bonus', 'referral', 'bonus', 'referralBonusesTotal']),
+    withdrawableAmount: pickNum(src, ['withdrawableAmount', 'withdrawable', 'withdrawable_amount']),
+    pendingAmount: pickNum(src, ['pendingAmount', 'pending', 'pending_amount']),
     currency: typeof src.currency === 'string' ? (src.currency as string) : undefined,
   };
+  if (dbg) {
+    // eslint-disable-next-line no-console
+    console.debug('EarningsSummary normalized:', normalized);
+  }
   return normalized;
+}
+
+export type EarningsType = 'investment_earning' | 'referral_bonus' | 'all';
+export type ListEarningsParams = {
+  type?: EarningsType;
+  isWithdrawn?: boolean;
+  page?: number;
+  pageSize?: number;
+  sortBy?: 'date' | 'amount' | 'withdrawableDate';
+  sortOrder?: 'asc' | 'desc';
+};
+
+export type EarningsItem = {
+  id: string;
+  type: 'investment_earning' | 'referral_bonus' | string;
+  amount: number;
+  currency: string;
+  isWithdrawn?: boolean;
+  date: string;
+  withdrawableDate?: string;
+  description?: string;
+  _id?: string;
+  createdAt?: string;
+  [key: string]: unknown;
+};
+
+export type ListEarningsResponse = {
+  data: EarningsItem[];
+  total?: number;
+  page?: number;
+  pageSize?: number;
+};
+
+function isEarningsListEnvelope(raw: unknown): raw is { data?: unknown[]; total?: number; page?: number; pageSize?: number } | { earnings?: unknown[] } {
+  if (!raw || typeof raw !== 'object') return false;
+  const r = raw as Record<string, unknown>;
+  if (Array.isArray(r.data)) return true;
+  if (Array.isArray(r.earnings)) return true;
+  return false;
+}
+
+export async function listEarnings(params: ListEarningsParams = {}, token?: string, signal?: AbortSignal): Promise<{ items: EarningsItem[]; total?: number; page?: number; pageSize?: number; }> {
+  const query = new URLSearchParams();
+  if (params.type) query.set('type', params.type);
+  if (typeof params.isWithdrawn === 'boolean') query.set('isWithdrawn', String(params.isWithdrawn));
+  if (typeof params.page === 'number') query.set('page', String(params.page));
+  if (typeof params.pageSize === 'number') query.set('pageSize', String(params.pageSize));
+  if (params.sortBy) query.set('sortBy', params.sortBy);
+  if (params.sortOrder) query.set('sortOrder', params.sortOrder);
+  const raw = await getJson<unknown>(`/api/earnings?${query.toString()}`, token, signal);
+  const dbg = (typeof window !== 'undefined' && (localStorage.getItem('dkp_debug_earnings') === '1')) || process.env.NEXT_PUBLIC_DEBUG_EARNINGS === '1';
+  if (dbg) {
+    // eslint-disable-next-line no-console
+    console.debug('ListEarnings raw:', raw);
+  }
+  if (isEarningsListEnvelope(raw)) {
+    const r = raw as Record<string, unknown>;
+    const arr = (Array.isArray(r.data) ? (r.data as unknown[]) : (Array.isArray(r.earnings) ? (r.earnings as unknown[]) : []));
+    const items = arr.map((it) => {
+      const o = it as Record<string, unknown>;
+      const id = String(o._id ?? o.id ?? '');
+      const type = String(o.type ?? 'investment_earning');
+      const amount = (() => {
+        const v = o.amount;
+        if (typeof v === 'number') return v;
+        if (typeof v === 'string') {
+          const n = Number(v.replace?.(/,/g, '') ?? v);
+          return Number.isNaN(n) ? 0 : n;
+        }
+        return 0;
+      })();
+      const currency = typeof o.currency === 'string' ? (o.currency as string) : 'USDT';
+      const isWithdrawn = typeof o.isWithdrawn === 'boolean' ? (o.isWithdrawn as boolean) : undefined;
+      const date = String(o.createdAt ?? o.date ?? new Date().toISOString());
+      const withdrawableDate = typeof o.withdrawableDate === 'string' ? (o.withdrawableDate as string) : undefined;
+      const description = typeof o.description === 'string' ? (o.description as string) : undefined;
+      return { id, type, amount, currency, isWithdrawn, date, withdrawableDate, description, _id: o._id as string | undefined, createdAt: o.createdAt as string | undefined } as EarningsItem;
+    });
+    if (dbg) {
+      // eslint-disable-next-line no-console
+      console.debug('ListEarnings normalized count:', items.length);
+    }
+    return {
+      items,
+      total: (r.total as number | undefined),
+      page: (r.page as number | undefined),
+      pageSize: (r.pageSize as number | undefined)
+    };
+  }
+  return { items: [] };
+}
+
+export type WithdrawEarningsRequest = { amount: number; currency: string; walletAddress: string };
+export type WithdrawEarningsResponse = { message?: string; data?: { reference?: string; transactionId?: string } };
+
+export async function withdrawEarnings(body: WithdrawEarningsRequest, token?: string): Promise<WithdrawEarningsResponse> {
+  return postJson<WithdrawEarningsRequest, WithdrawEarningsResponse>('/api/earnings/withdraw', body, token);
+}
+
+export type EarningsToday = { investment_earning?: number; referral_bonus?: number; total?: number; currency?: string };
+export async function getEarningsToday(token?: string, signal?: AbortSignal): Promise<EarningsToday> {
+  const raw = await getJson<unknown>('/api/earnings/today', token, signal);
+  const dbg = (typeof window !== 'undefined' && (localStorage.getItem('dkp_debug_earnings') === '1')) || process.env.NEXT_PUBLIC_DEBUG_EARNINGS === '1';
+  if (dbg) {
+    // eslint-disable-next-line no-console
+    console.debug('EarningsToday raw:', raw);
+  }
+  const src = (raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}) as Record<string, unknown>;
+  const coerce = (v: unknown) => typeof v === 'number' ? v : (typeof v === 'string' ? (Number(v)) : undefined);
+  return {
+    investment_earning: coerce(src.investment_earning),
+    referral_bonus: coerce(src.referral_bonus),
+    total: coerce(src.total),
+    currency: typeof src.currency === 'string' ? (src.currency as string) : undefined,
+  };
+}
+
+export type EarningsDailyItem = { date: string; investment_earning?: number; referral_bonus?: number; total?: number };
+export async function getEarningsDaily(params: { start?: string; end?: string } = {}, token?: string, signal?: AbortSignal): Promise<EarningsDailyItem[]> {
+  const q = new URLSearchParams();
+  if (params.start) q.set('start', params.start);
+  if (params.end) q.set('end', params.end);
+  const path = `/api/earnings/daily${q.toString() ? `?${q.toString()}` : ''}`;
+  const raw = await getJson<unknown>(path, token, signal);
+  if (Array.isArray(raw)) return raw as EarningsDailyItem[];
+  const r = raw as { data?: unknown } | undefined;
+  if (r && Array.isArray(r.data)) return r.data as EarningsDailyItem[];
+  return [];
 }
 
 export type ExportFormat = 'csv' | 'xlsx';
