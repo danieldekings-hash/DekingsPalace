@@ -362,15 +362,21 @@ function isEarningsEnvelope(raw: unknown): raw is { success?: boolean; data?: Re
 export async function getEarningsSummary(token?: string, signal?: AbortSignal): Promise<EarningsSummary> {
   const raw = await getJson<unknown>('/api/earnings/summary', token, signal);
   const src = isEarningsEnvelope(raw) ? (raw.data as Record<string, unknown>) : (raw as Record<string, unknown>);
-  const getNum = (v: unknown): number | undefined => (typeof v === 'number' ? v : undefined);
+  const pickNum = (o: Record<string, unknown>, keys: string[]): number | undefined => {
+    for (const k of keys) {
+      const v = o[k];
+      if (typeof v === 'number') return v;
+    }
+    return undefined;
+  };
   const normalized: EarningsSummary = {
-    totalEarnings: getNum(src.totalEarnings),
-    withdrawnAmount: getNum((src as any).withdrawnAmount) ?? getNum((src as any).totalWithdrawn),
-    availableAmount: getNum((src as any).availableAmount) ?? getNum((src as any).totalAvailable),
-    investmentEarnings: getNum((src as any).investmentEarnings),
-    referralBonuses: getNum((src as any).referralBonuses),
-    withdrawableAmount: getNum((src as any).withdrawableAmount),
-    pendingAmount: getNum((src as any).pendingAmount),
+    totalEarnings: pickNum(src, ['totalEarnings']),
+    withdrawnAmount: pickNum(src, ['withdrawnAmount', 'totalWithdrawn']),
+    availableAmount: pickNum(src, ['availableAmount', 'totalAvailable']),
+    investmentEarnings: pickNum(src, ['investmentEarnings']),
+    referralBonuses: pickNum(src, ['referralBonuses']),
+    withdrawableAmount: pickNum(src, ['withdrawableAmount']),
+    pendingAmount: pickNum(src, ['pendingAmount']),
     currency: typeof src.currency === 'string' ? (src.currency as string) : undefined,
   };
   return normalized;
