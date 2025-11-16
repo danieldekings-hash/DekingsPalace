@@ -194,7 +194,7 @@ export default function EarningsPage() {
   }, [filterType, filterWithdrawn, sortBy, sortOrder]);
 
   const filteredItems = useMemo(() => {
-    let filtered = items.filter(it => {
+    const filtered = items.filter(it => {
       // Filter by type
       if (filterType !== 'all' && it.type !== filterType) {
         return false;
@@ -338,7 +338,7 @@ export default function EarningsPage() {
       </div>
 
       <div className="row mb-4">
-        <div className="col-12 col-md-3 mb-3">
+        <div className="col-6 col-md-3 mb-3">
           <div className="card border-gold card-hover">
             <div className="card-body text-center">
               <h6 className="text-secondary mb-1">Total Referral Bonuses</h6>
@@ -346,9 +346,6 @@ export default function EarningsPage() {
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="row mb-4">
         <div className="col-6 col-md-3 mb-3">
           <div className="card border-gold card-hover">
             <div className="card-body text-center">
@@ -454,7 +451,7 @@ export default function EarningsPage() {
             </div>
             <div className="col-12 col-md-2 d-grid">
               <Button variant="outline" onClick={handleWithdraw} disabled={withdrawing}>
-                {withdrawing ? 'Submitting...' : 'Withdraw'}
+                {withdrawing ? 'Submitting...' : 'Place Withdrawal'}
               </Button>
             </div>
           </div>
