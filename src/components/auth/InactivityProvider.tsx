@@ -52,7 +52,7 @@ export default function InactivityProvider({ children }: { children: React.React
       if (token) {
         await logout(token);
       }
-    } catch (e) {
+    } catch {
     } finally {
       clearToken();
       router.replace('/login');
@@ -126,6 +126,7 @@ export default function InactivityProvider({ children }: { children: React.React
       events.forEach((name) => window.removeEventListener(name, markActivity as EventListener));
       try { bcRef.current?.close(); } catch {}
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <>{children}</>;
