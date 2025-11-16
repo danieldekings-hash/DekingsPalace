@@ -637,7 +637,7 @@ export async function withdrawEarnings(body: WithdrawEarningsRequest, token?: st
   return postJson<WithdrawEarningsRequest, WithdrawEarningsResponse>('/api/earnings/withdraw', body, token);
 }
 
-export type EarningsToday = { investment_earning?: number; referral_bonus?: number; total?: number; currency?: string };
+export type EarningsToday = { investment_earning?: number; referral_bonus?: number; total?: number; currency?: string; date?: string };
 export async function getEarningsToday(token?: string, signal?: AbortSignal): Promise<EarningsToday> {
   const raw = await getJson<unknown>('/api/earnings/today', token, signal);
   const dbg = (typeof window !== 'undefined' && (localStorage.getItem('dkp_debug_earnings') === '1')) || process.env.NEXT_PUBLIC_DEBUG_EARNINGS === '1';
@@ -645,12 +645,24 @@ export async function getEarningsToday(token?: string, signal?: AbortSignal): Pr
     // eslint-disable-next-line no-console
     console.debug('EarningsToday raw:', raw);
   }
-  const src = (raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}) as Record<string, unknown>;
+  
+  // Handle response structure: { success: true, data: { investment, referral, total, date } }
+  let src: Record<string, unknown> = {};
+  if (raw && typeof raw === 'object') {
+    const r = raw as Record<string, unknown>;
+    if (r.success === true && r.data && typeof r.data === 'object') {
+      src = r.data as Record<string, unknown>;
+    } else {
+      src = r as Record<string, unknown>;
+    }
+  }
+  
   const coerce = (v: unknown) => typeof v === 'number' ? v : (typeof v === 'string' ? (Number(v)) : undefined);
   return {
-    investment_earning: coerce(src.investment_earning),
-    referral_bonus: coerce(src.referral_bonus),
+    investment_earning: coerce(src.investment ?? src.investment_earning),
+    referral_bonus: coerce(src.referral ?? src.referral_bonus),
     total: coerce(src.total),
+    date: typeof src.date === 'string' ? (src.date as string) : undefined,
     currency: typeof src.currency === 'string' ? (src.currency as string) : undefined,
   };
 }

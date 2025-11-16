@@ -8,6 +8,7 @@ import { Wallet as WalletIcon, BarChart2, TrendingUp, CreditCard } from 'lucide-
 import { getUser } from '@/lib/auth';
 import auth from '@/lib/auth';
 import api, { type InvestmentsSummary, type InvestmentItem, type ActivityItem, getRecentActivities, type EarningsSummary, getEarningsSummary } from '@/lib/api';
+import { SkeletonCard } from '@/components/ui/Skeleton';
 
 type StoredUser = {
   id?: string;
@@ -75,189 +76,249 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Earnings Summary Cards */}
-      <div className="row g-4 mb-5">
-        <div className="col-md-6 col-lg-4">
-          <div className="card border-gold card-hover">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="text-secondary mb-1 small">Total Investment</p>
-                  <h3 className="fw-bold mb-1 text-gold">{Number(summary?.totalInvested ?? 0).toLocaleString()}</h3>
-                 
-                </div>
-                <div className="text-gold">
-                  <WalletIcon size={28} />
-                </div>
-              </div>
+      {/* Earnings Summary Cards - Show skeleton while loading, then fade in content */}
+      {isLoading ? (
+        <div className="row g-4 mb-5">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="col-md-6 col-lg-4">
+              <SkeletonCard />
             </div>
-          </div>
+          ))}
         </div>
-        <div className="col-md-6 col-lg-4">
-          <div className="card border-gold card-hover">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="text-secondary mb-1 small">Active Investments</p>
-                  <h3 className="fw-bold mb-0">{Number(summary?.activeCount ?? activeInvestments.length)}</h3>
-                </div>
-                <div className="text-gold">
-                  <BarChart2 size={28} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-6 col-lg-4">
-          <div className="card border-gold card-hover">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="text-secondary mb-1 small">Total Earnings</p>
-                  <h3 className="fw-bold mb-0 text-gold">{(earnings?.totalEarnings ?? 0).toLocaleString()} {earnings?.currency || ''}</h3>
-                </div>
-                <div className="text-gold">
-                  <TrendingUp size={28} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-6 col-lg-4">
-          <div className="card border-gold card-hover">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="text-secondary mb-1 small">Withdrawn</p>
-                  <h3 className="fw-bold mb-0">{(earnings?.withdrawnAmount ?? 0).toLocaleString()} {earnings?.currency || ''}</h3>
-                </div>
-                <div className="text-gold">
-                  <CreditCard size={28} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-6 col-lg-4">
-          <div className="card border-gold card-hover">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="text-secondary mb-1 small">Available</p>
-                  <h3 className="fw-bold mb-0">{(earnings?.availableAmount ?? 0).toLocaleString()} {earnings?.currency || ''}</h3>
-                </div>
-                <div className="text-gold">
-                  <WalletIcon size={28} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-6 col-lg-4">
-          <div className="card border-gold card-hover">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="text-secondary mb-1 small">Investment Earnings So Far</p>
-                  <h5 className="fw-bold mb-0">{(earnings?.investmentEarnings ?? 0).toLocaleString()} {earnings?.currency || ''}</h5>
-                </div>
-                <div className="text-gold">
-                  <BarChart2 size={28} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-6 col-lg-4">
-          <div className="card border-gold card-hover">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="text-secondary mb-1 small">Referral Bonuses</p>
-                  <h5 className="fw-bold mb-0">{(earnings?.referralBonuses ?? 0).toLocaleString()} {earnings?.currency || ''}</h5>
-                </div>
-                <div className="text-gold">
-                  <TrendingUp size={28} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-6 col-lg-4">
-          <div className="card border-gold card-hover">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="text-secondary mb-1 small">Withdrawable</p>
-                  <h5 className="fw-bold mb-0">{(earnings?.withdrawableAmount ?? 0).toLocaleString()} {earnings?.currency || ''}</h5>
-                </div>
-                <div className="text-gold">
-                  <CreditCard size={28} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Active Plans (purchased) */}
-      <div className="mb-4">
-        <h2 className="h4 fw-bold mb-3 text-gold">Active Plans</h2>
-      </div>
-      <div className="row g-4">
-        {activeInvestments.length === 0 && !isLoading && (
-          <div className="col-12">
-            <div className="alert alert-secondary">You have no active plans yet.</div>
-          </div>
-        )}
-        {activeInvestments.map((inv) => (
-          <div key={inv.id} className="col-md-6 col-lg-4">
-            <div className="card border-gold card-hover h-100">
+      ) : (summary || earnings) && (
+        <div className="row g-4 mb-5 content-fade-in">
+          <div className="col-md-6 col-lg-4">
+            <div className="card border-gold card-hover">
               <div className="card-body">
-                <div className="d-flex justify-content-between align-items-start mb-2">
-                  <h5 className="fw-bold text-white mb-0">{inv.planName}</h5>
-                  <span className="badge bg-success">Active</span>
-                </div>
-                <div className="text-secondary small mb-3">
-                  Started: {new Date(inv.startDate).toLocaleDateString()}
-                </div>
-                <div className="d-flex justify-content-between mb-2">
-                  <span className="text-secondary">Amount</span>
-                  <span className="fw-bold text-gold">
-                    {Number(inv.amount).toLocaleString()} {inv.currency || 'USDT'}
-                  </span>
-                </div>
-                <div className="d-flex justify-content-between mb-2">
-                  <span className="text-secondary">Monthly %</span>
-                  <span className="fw-bold">{Number(inv.planPercentage ?? 0)}%</span>
-                </div>
-                <div className="d-flex justify-content-between">
-                  <span className="text-secondary">Total Earnings</span>
-                  <span className="fw-bold text-success">
-                    {Number(inv.totalEarnings ?? 0).toLocaleString()} {inv.currency || 'USDT'}
-                  </span>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <p className="text-secondary mb-1 small">Total Investment</p>
+                    <h3 className="fw-bold mb-1 text-gold">
+                      {Number(summary?.totalInvested ?? 0).toLocaleString()}
+                    </h3>
+                 
+                  </div>
+                  <div className="text-gold">
+                    <WalletIcon size={28} />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        ))}
-      </div>
+          <div className="col-md-6 col-lg-4">
+            <div className="card border-gold card-hover">
+              <div className="card-body">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <p className="text-secondary mb-1 small">Active Investments</p>
+                    <h3 className="fw-bold mb-0">
+                      {Number(summary?.activeCount ?? activeInvestments.length)}
+                    </h3>
+                  </div>
+                  <div className="text-gold">
+                    <BarChart2 size={28} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {earnings && (
+            <>
+              <div className="col-md-6 col-lg-4">
+                <div className="card border-gold card-hover">
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <p className="text-secondary mb-1 small">Total Earnings</p>
+                        <h3 className="fw-bold mb-0 text-gold">
+                          {(earnings.totalEarnings ?? 0).toLocaleString()} {earnings.currency || ''}
+                        </h3>
+                      </div>
+                      <div className="text-gold">
+                        <TrendingUp size={28} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-      {/* Recent Activity */}
-      <div className="mt-5">
-        <h2 className="h4 fw-bold mb-3 text-gold">Recent Activity</h2>
-        <div className="card border-gold card-hover">
-          <div className="card-body">
-            {recentActivities.length === 0 ? (
-              <div className="text-secondary">No recent activity.</div>
-            ) : (
-              <div className="list-group list-group-flush">
-                {recentActivities.map((a) => (
+              <div className="col-md-6 col-lg-4">
+                <div className="card border-gold card-hover">
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <p className="text-secondary mb-1 small">Withdrawn</p>
+                        <h3 className="fw-bold mb-0">
+                          {(earnings.withdrawnAmount ?? 0).toLocaleString()} {earnings.currency || ''}
+                        </h3>
+                      </div>
+                      <div className="text-gold">
+                        <CreditCard size={28} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-md-6 col-lg-4">
+                <div className="card border-gold card-hover">
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <p className="text-secondary mb-1 small">Available</p>
+                        <h3 className="fw-bold mb-0">
+                          {(earnings.availableAmount ?? 0).toLocaleString()} {earnings.currency || ''}
+                        </h3>
+                      </div>
+                      <div className="text-gold">
+                        <WalletIcon size={28} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-md-6 col-lg-4">
+                <div className="card border-gold card-hover">
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <p className="text-secondary mb-1 small">Investment Earnings So Far</p>
+                        <h5 className="fw-bold mb-0">
+                          {(earnings.investmentEarnings ?? 0).toLocaleString()} {earnings.currency || ''}
+                        </h5>
+                      </div>
+                      <div className="text-gold">
+                        <BarChart2 size={28} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-md-6 col-lg-4">
+                <div className="card border-gold card-hover">
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <p className="text-secondary mb-1 small">Referral Bonuses</p>
+                        <h5 className="fw-bold mb-0">
+                          {(earnings.referralBonuses ?? 0).toLocaleString()} {earnings.currency || ''}
+                        </h5>
+                      </div>
+                      <div className="text-gold">
+                        <TrendingUp size={28} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-md-6 col-lg-4">
+                <div className="card border-gold card-hover">
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <p className="text-secondary mb-1 small">Withdrawable</p>
+                        <h5 className="fw-bold mb-0">
+                          {(earnings.withdrawableAmount ?? 0).toLocaleString()} {earnings.currency || ''}
+                        </h5>
+                      </div>
+                      <div className="text-gold">
+                        <CreditCard size={28} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Active Plans (purchased) - Show skeleton while loading, then fade in content */}
+      {isLoading ? (
+        <>
+          <div className="mb-4">
+            <h2 className="h4 fw-bold mb-3 text-gold">Active Plans</h2>
+          </div>
+          <div className="row g-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="col-md-6 col-lg-4">
+                <SkeletonCard />
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="mb-4">
+            <h2 className="h4 fw-bold mb-3 text-gold">Active Plans</h2>
+          </div>
+          <div className="row g-4 content-fade-in">
+            {activeInvestments.length === 0 && summary ? (
+              <div className="col-12">
+                <div className="alert alert-secondary">You have no active plans yet.</div>
+              </div>
+            ) : activeInvestments.length > 0 ? (
+              activeInvestments.map((inv) => (
+                <div key={inv.id} className="col-md-6 col-lg-4">
+                  <div className="card border-gold card-hover h-100">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <h5 className="fw-bold text-white mb-0">{inv.planName}</h5>
+                        <span className="badge bg-success">Active</span>
+                      </div>
+                      <div className="text-secondary small mb-3">
+                        Started: {new Date(inv.startDate).toLocaleDateString()}
+                      </div>
+                      <div className="d-flex justify-content-between mb-2">
+                        <span className="text-secondary">Amount</span>
+                        <span className="fw-bold text-gold">
+                          {Number(inv.amount).toLocaleString()} {inv.currency || 'USDT'}
+                        </span>
+                      </div>
+                      <div className="d-flex justify-content-between mb-2">
+                        <span className="text-secondary">Monthly %</span>
+                        <span className="fw-bold">{Number(inv.planPercentage ?? 0)}%</span>
+                      </div>
+                      <div className="d-flex justify-content-between">
+                        <span className="text-secondary">Total Earnings</span>
+                        <span className="fw-bold text-success">
+                          {Number(inv.totalEarnings ?? 0).toLocaleString()} {inv.currency || 'USDT'}
+                        </span>
+                      </div>
+                </div>
+              </div>
+            </div>
+              ))
+            ) : null}
+          </div>
+        </>
+      )}
+
+      {/* Recent Activity - Show skeleton while loading, then fade in content */}
+      {isLoading ? (
+        <div className="mt-5">
+          <h2 className="h4 fw-bold mb-3 text-gold">Recent Activity</h2>
+          <div className="card border-gold card-hover">
+            <div className="card-body">
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-5 content-fade-in">
+          <h2 className="h4 fw-bold mb-3 text-gold">Recent Activity</h2>
+          <div className="card border-gold card-hover">
+            <div className="card-body">
+              {recentActivities.length === 0 ? (
+                <div className="text-secondary">No recent activity.</div>
+              ) : (
+                <div className="list-group list-group-flush">
+                  {recentActivities.map((a) => (
                   <div key={a.id} className="list-group-item d-flex justify-content-between align-items-center px-0">
                     <div>
                       <h6 className="mb-1">{a.title || a.type}</h6>
@@ -272,12 +333,13 @@ export default function DashboardPage() {
                       </span>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
