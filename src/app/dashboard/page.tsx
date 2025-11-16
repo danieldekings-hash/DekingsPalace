@@ -81,7 +81,7 @@ export default function DashboardPage() {
         <div className="row g-4 mb-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="col-md-6 col-lg-4">
-              <SkeletonCard />
+              <SkeletonCard variant="dashboard" />
             </div>
           ))}
         </div>
@@ -245,7 +245,7 @@ export default function DashboardPage() {
           <div className="row g-4">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="col-md-6 col-lg-4">
-                <SkeletonCard />
+                <SkeletonCard variant="dashboard" />
               </div>
             ))}
           </div>

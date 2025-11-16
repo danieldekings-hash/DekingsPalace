@@ -204,14 +204,14 @@ export default function EarningsPage() {
           <div className="row mb-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="col-6 col-md-3 mb-3">
-                <SkeletonCard />
+                <SkeletonCard variant="centered" />
               </div>
             ))}
           </div>
           <div className="row mb-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="col-6 col-md-3 mb-3">
-                <SkeletonCard />
+                <SkeletonCard variant="centered" />
               </div>
             ))}
           </div>
