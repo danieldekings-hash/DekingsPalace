@@ -127,12 +127,22 @@ async function getJson<TRes>(path: string, token?: string, signal?: AbortSignal)
 
   if (!res!.ok) {
     const text = await res.text();
-    let message = text;
+    let message: string = text || `Request failed with status ${res.status}`;
     try {
       const json = JSON.parse(text || '{}');
-      message = (json && (json.message || json.error)) || JSON.stringify(json) || text;
+      // Try multiple ways to extract error message
+      if (json && typeof json === 'object') {
+        message = json.message || json.error || json.msg || json.errorMessage;
+        if (!message && Object.keys(json).length > 0) {
+          // If no message field, stringify the whole object for debugging
+          const jsonStr = JSON.stringify(json);
+          message = jsonStr.length > 200 ? jsonStr.substring(0, 200) + '...' : jsonStr;
+        }
+      }
+      if (!message || message === '{}') message = text || `Request failed with status ${res.status}`;
     } catch {
-      // ignore parse errors
+      // If JSON parsing fails, use the raw text
+      message = text || `Request failed with status ${res.status}`;
     }
 
     const looksLikeHtml = typeof message === 'string' && /<\/?[a-z][\s\S]*>/i.test(message);
@@ -142,11 +152,23 @@ async function getJson<TRes>(path: string, token?: string, signal?: AbortSignal)
       message = `Request failed with status ${res.status} ${res.statusText || ''}`.trim();
     }
 
-    throw new Error(message || 'Request failed');
+    // Ensure message is always a string
+    const errorMessage = typeof message === 'string' ? message : `Request failed with status ${res.status}`;
+    // eslint-disable-next-line no-console
+    console.error('API Error (getJson):', { path, status: res.status, statusText: res.statusText, message: errorMessage });
+    throw new Error(errorMessage);
   }
 
-  const data = await res!.json();
-  return data as TRes;
+  let data: TRes;
+  try {
+    data = await res!.json();
+  } catch (e) {
+    const errorMsg = e instanceof Error ? e.message : 'Failed to parse JSON response';
+    // eslint-disable-next-line no-console
+    console.error('Failed to parse JSON response from', path, ':', errorMsg, 'Status:', res.status);
+    throw new Error(`Invalid JSON response: ${errorMsg}`);
+  }
+  return data;
 }
 
 async function postJson<TReq extends object, TRes>(path: string, body: TReq, token?: string): Promise<TRes> {
@@ -361,25 +383,289 @@ function isEarningsEnvelope(raw: unknown): raw is { success?: boolean; data?: Re
 
 export async function getEarningsSummary(token?: string, signal?: AbortSignal): Promise<EarningsSummary> {
   const raw = await getJson<unknown>('/api/earnings/summary', token, signal);
-  const src = isEarningsEnvelope(raw) ? (raw.data as Record<string, unknown>) : (raw as Record<string, unknown>);
+  const dbg = (typeof window !== 'undefined' && (localStorage.getItem('dkp_debug_earnings') === '1')) || process.env.NEXT_PUBLIC_DEBUG_EARNINGS === '1';
+  if (dbg) {
+    // eslint-disable-next-line no-console
+    console.debug('EarningsSummary raw:', raw);
+  }
+  
+  // Handle different response formats
+  let src: Record<string, unknown>;
+  if (isEarningsEnvelope(raw)) {
+    src = (raw.data as Record<string, unknown>) || {};
+  } else if (raw && typeof raw === 'object') {
+    src = raw as Record<string, unknown>;
+  } else {
+    src = {};
+  }
+  
   const pickNum = (o: Record<string, unknown>, keys: string[]): number | undefined => {
     for (const k of keys) {
       const v = o[k];
       if (typeof v === 'number') return v;
+      if (typeof v === 'string') {
+        const n = Number(v.replace?.(/,/g, '') ?? v);
+        if (!Number.isNaN(n)) return n;
+      }
     }
     return undefined;
   };
   const normalized: EarningsSummary = {
-    totalEarnings: pickNum(src, ['totalEarnings']),
-    withdrawnAmount: pickNum(src, ['withdrawnAmount', 'totalWithdrawn']),
-    availableAmount: pickNum(src, ['availableAmount', 'totalAvailable']),
-    investmentEarnings: pickNum(src, ['investmentEarnings']),
-    referralBonuses: pickNum(src, ['referralBonuses']),
-    withdrawableAmount: pickNum(src, ['withdrawableAmount']),
-    pendingAmount: pickNum(src, ['pendingAmount']),
+    totalEarnings: pickNum(src, ['totalEarnings', 'total_earnings', 'total', 'sum', 'overall']),
+    withdrawnAmount: pickNum(src, ['totalWithdrawn', 'withdrawnAmount', 'withdrawn', 'withdrawn_sum']),
+    availableAmount: pickNum(src, ['totalAvailable', 'availableAmount', 'available', 'available_sum', 'balance', 'remaining']),
+    investmentEarnings: pickNum(src, ['investmentEarnings', 'investmentEarning', 'investment', 'investment_earning']),
+    referralBonuses: pickNum(src, ['referralBonuses', 'referralBonusesTotal', 'referral_bonus', 'referral', 'bonus']),
+    withdrawableAmount: pickNum(src, ['withdrawableAmount', 'withdrawable', 'withdrawable_amount']),
+    pendingAmount: pickNum(src, ['pendingAmount', 'pending', 'pending_amount']),
     currency: typeof src.currency === 'string' ? (src.currency as string) : undefined,
   };
+  if (dbg) {
+    // eslint-disable-next-line no-console
+    console.debug('EarningsSummary normalized:', normalized);
+    // eslint-disable-next-line no-console
+    console.debug('EarningsSummary source keys:', Object.keys(src));
+  }
   return normalized;
+}
+
+export type EarningsType = 'investment_earning' | 'referral_bonus' | 'all';
+export type ListEarningsParams = {
+  type?: EarningsType;
+  isWithdrawn?: boolean;
+  page?: number;
+  pageSize?: number;
+  sortBy?: 'date' | 'amount' | 'withdrawableDate';
+  sortOrder?: 'asc' | 'desc';
+};
+
+export type EarningsItem = {
+  id: string;
+  type: 'investment_earning' | 'referral_bonus' | string;
+  amount: number;
+  currency: string;
+  isWithdrawn?: boolean;
+  date: string;
+  withdrawableDate?: string;
+  description?: string;
+  _id?: string;
+  createdAt?: string;
+  [key: string]: unknown;
+};
+
+export type ListEarningsResponse = {
+  data: EarningsItem[];
+  total?: number;
+  page?: number;
+  pageSize?: number;
+};
+
+function isEarningsListEnvelope(raw: unknown): raw is { data?: unknown[] | { earnings?: unknown[]; meta?: Record<string, unknown> }; total?: number; page?: number; pageSize?: number; success?: boolean } | { earnings?: unknown[] } {
+  if (Array.isArray(raw)) return true; // Direct array response
+  if (!raw || typeof raw !== 'object') return false;
+  const r = raw as Record<string, unknown>;
+  if (Array.isArray(r.data)) return true;
+  if (Array.isArray(r.earnings)) return true;
+  // Handle { success: true, data: { earnings: [...], meta: {...} } }
+  if (r.success === true && r.data && typeof r.data === 'object') {
+    const data = r.data as Record<string, unknown>;
+    if (Array.isArray(data.earnings)) return true;
+  }
+  return false;
+}
+
+export async function listEarnings(params: ListEarningsParams = {}, token?: string, signal?: AbortSignal): Promise<{ items: EarningsItem[]; total?: number; page?: number; pageSize?: number; }> {
+  const query = new URLSearchParams();
+  // Only include type if it's not 'all' (API accepts 'all' but we'll include it for now based on Postman example)
+  if (params.type && params.type !== 'all') {
+    query.set('type', params.type);
+  } else if (params.type === 'all') {
+    // Include 'all' as per Postman example
+    query.set('type', 'all');
+  }
+  if (typeof params.isWithdrawn === 'boolean') {
+    query.set('isWithdrawn', String(params.isWithdrawn));
+  }
+  if (typeof params.page === 'number') query.set('page', String(params.page));
+  if (typeof params.pageSize === 'number') query.set('pageSize', String(params.pageSize));
+  if (params.sortBy) query.set('sortBy', params.sortBy);
+  if (params.sortOrder) query.set('sortOrder', params.sortOrder);
+  const queryString = query.toString();
+  const url = `/api/earnings${queryString ? `?${queryString}` : ''}`;
+  // Always log the URL for debugging 400 errors
+  // eslint-disable-next-line no-console
+  console.log('ListEarnings requesting URL:', url, 'with params:', params);
+  const dbg = (typeof window !== 'undefined' && (localStorage.getItem('dkp_debug_earnings') === '1')) || process.env.NEXT_PUBLIC_DEBUG_EARNINGS === '1';
+  if (dbg) {
+    // eslint-disable-next-line no-console
+    console.debug('ListEarnings requesting:', url);
+  }
+  let raw: unknown;
+  try {
+    raw = await getJson<unknown>(url, token, signal);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('ListEarnings API error:', {
+      url,
+      params: { type: params.type, isWithdrawn: params.isWithdrawn, page: params.page, pageSize: params.pageSize, sortBy: params.sortBy, sortOrder: params.sortOrder },
+      error: e instanceof Error ? e.message : String(e),
+      errorObject: e
+    });
+    throw e;
+  }
+  if (dbg) {
+    // eslint-disable-next-line no-console
+    console.debug('ListEarnings raw:', raw);
+  }
+  
+  // Handle direct array response
+  if (Array.isArray(raw)) {
+    const items = raw.map((it) => {
+      const o = it as Record<string, unknown>;
+      const id = String(o._id ?? o.id ?? '');
+      const type = String(o.type ?? 'investment_earning');
+      const amount = (() => {
+        const v = o.amount;
+        if (typeof v === 'number') return v;
+        if (typeof v === 'string') {
+          const n = Number(v.replace?.(/,/g, '') ?? v);
+          return Number.isNaN(n) ? 0 : n;
+        }
+        return 0;
+      })();
+      const currency = typeof o.currency === 'string' ? (o.currency as string) : 'USDT';
+      const isWithdrawn = typeof o.isWithdrawn === 'boolean' ? (o.isWithdrawn as boolean) : undefined;
+      const date = String(o.createdAt ?? o.date ?? new Date().toISOString());
+      const withdrawableDate = typeof o.withdrawableDate === 'string' ? (o.withdrawableDate as string) : undefined;
+      // Build description from available fields
+      let description: string | undefined = typeof o.description === 'string' ? o.description : undefined;
+      if (!description) {
+        if (type === 'referral_bonus' && o.referredUser && typeof o.referredUser === 'object') {
+          const user = o.referredUser as { fullName?: string; email?: string };
+          description = `Referral bonus from ${user.fullName || user.email || 'user'}`;
+        } else if (type === 'investment_earning' && o.investment && typeof o.investment === 'object') {
+          const inv = o.investment as { plan?: string; amount?: number };
+          description = `Investment earning from ${inv.plan || 'plan'} plan`;
+        }
+      }
+      return { id, type, amount, currency, isWithdrawn, date, withdrawableDate, description, _id: o._id as string | undefined, createdAt: o.createdAt as string | undefined } as EarningsItem;
+    });
+    if (dbg) {
+      // eslint-disable-next-line no-console
+      console.debug('ListEarnings normalized count (direct array):', items.length);
+    }
+    return { items };
+  }
+  
+  // Handle envelope response
+  if (isEarningsListEnvelope(raw)) {
+    const r = raw as Record<string, unknown>;
+    let arr: unknown[] = [];
+    let meta: { total?: number; page?: number; pageSize?: number } | undefined;
+    
+    // Handle { success: true, data: { earnings: [...], meta: {...} } }
+    if (r.success === true && r.data && typeof r.data === 'object') {
+      const data = r.data as Record<string, unknown>;
+      if (Array.isArray(data.earnings)) {
+        arr = data.earnings as unknown[];
+      }
+      if (data.meta && typeof data.meta === 'object') {
+        meta = data.meta as { total?: number; page?: number; pageSize?: number };
+      }
+    } else if (Array.isArray(r.data)) {
+      // Handle { data: [...] }
+      arr = r.data as unknown[];
+    } else if (Array.isArray(r.earnings)) {
+      // Handle { earnings: [...] }
+      arr = r.earnings as unknown[];
+    }
+    
+    const items = arr.map((it) => {
+      const o = it as Record<string, unknown>;
+      const id = String(o._id ?? o.id ?? '');
+      const type = String(o.type ?? 'investment_earning');
+      const amount = (() => {
+        const v = o.amount;
+        if (typeof v === 'number') return v;
+        if (typeof v === 'string') {
+          const n = Number(v.replace?.(/,/g, '') ?? v);
+          return Number.isNaN(n) ? 0 : n;
+        }
+        return 0;
+      })();
+      const currency = typeof o.currency === 'string' ? (o.currency as string) : 'USDT';
+      const isWithdrawn = typeof o.isWithdrawn === 'boolean' ? (o.isWithdrawn as boolean) : undefined;
+      const date = String(o.createdAt ?? o.date ?? new Date().toISOString());
+      const withdrawableDate = typeof o.withdrawableDate === 'string' ? (o.withdrawableDate as string) : undefined;
+      // Build description from available fields
+      let description: string | undefined = typeof o.description === 'string' ? o.description : undefined;
+      if (!description) {
+        if (type === 'referral_bonus' && o.referredUser && typeof o.referredUser === 'object') {
+          const user = o.referredUser as { fullName?: string; email?: string };
+          description = `Referral bonus from ${user.fullName || user.email || 'user'}`;
+        } else if (type === 'investment_earning' && o.investment && typeof o.investment === 'object') {
+          const inv = o.investment as { plan?: string; amount?: number };
+          description = `Investment earning from ${inv.plan || 'plan'} plan`;
+        }
+      }
+      return { id, type, amount, currency, isWithdrawn, date, withdrawableDate, description, _id: o._id as string | undefined, createdAt: o.createdAt as string | undefined } as EarningsItem;
+    });
+    if (dbg) {
+      // eslint-disable-next-line no-console
+      console.debug('ListEarnings normalized count:', items.length);
+    }
+    return {
+      items,
+      total: meta?.total ?? (r.total as number | undefined),
+      page: meta?.page ?? (r.page as number | undefined),
+      pageSize: meta?.pageSize ?? (r.pageSize as number | undefined)
+    };
+  }
+  
+  // If response doesn't match expected format, log and return empty
+  if (dbg) {
+    // eslint-disable-next-line no-console
+    console.warn('ListEarnings: Unexpected response format:', raw);
+  }
+  return { items: [] };
+}
+
+export type WithdrawEarningsRequest = { amount: number; currency: string; walletAddress: string };
+export type WithdrawEarningsResponse = { message?: string; data?: { reference?: string; transactionId?: string } };
+
+export async function withdrawEarnings(body: WithdrawEarningsRequest, token?: string): Promise<WithdrawEarningsResponse> {
+  return postJson<WithdrawEarningsRequest, WithdrawEarningsResponse>('/api/earnings/withdraw', body, token);
+}
+
+export type EarningsToday = { investment_earning?: number; referral_bonus?: number; total?: number; currency?: string };
+export async function getEarningsToday(token?: string, signal?: AbortSignal): Promise<EarningsToday> {
+  const raw = await getJson<unknown>('/api/earnings/today', token, signal);
+  const dbg = (typeof window !== 'undefined' && (localStorage.getItem('dkp_debug_earnings') === '1')) || process.env.NEXT_PUBLIC_DEBUG_EARNINGS === '1';
+  if (dbg) {
+    // eslint-disable-next-line no-console
+    console.debug('EarningsToday raw:', raw);
+  }
+  const src = (raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}) as Record<string, unknown>;
+  const coerce = (v: unknown) => typeof v === 'number' ? v : (typeof v === 'string' ? (Number(v)) : undefined);
+  return {
+    investment_earning: coerce(src.investment_earning),
+    referral_bonus: coerce(src.referral_bonus),
+    total: coerce(src.total),
+    currency: typeof src.currency === 'string' ? (src.currency as string) : undefined,
+  };
+}
+
+export type EarningsDailyItem = { date: string; investment_earning?: number; referral_bonus?: number; total?: number };
+export async function getEarningsDaily(params: { start?: string; end?: string } = {}, token?: string, signal?: AbortSignal): Promise<EarningsDailyItem[]> {
+  const q = new URLSearchParams();
+  if (params.start) q.set('start', params.start);
+  if (params.end) q.set('end', params.end);
+  const path = `/api/earnings/daily${q.toString() ? `?${q.toString()}` : ''}`;
+  const raw = await getJson<unknown>(path, token, signal);
+  if (Array.isArray(raw)) return raw as EarningsDailyItem[];
+  const r = raw as { data?: unknown } | undefined;
+  if (r && Array.isArray(r.data)) return r.data as EarningsDailyItem[];
+  return [];
 }
 
 export type ExportFormat = 'csv' | 'xlsx';

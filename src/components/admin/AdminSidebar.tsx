@@ -30,6 +30,11 @@ export default function AdminSidebar() {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      try {
+        const bc = new BroadcastChannel('dkp_activity_channel');
+        bc.postMessage({ type: 'logout' });
+        bc.close();
+      } catch {}
       clearToken();
       window.location.href = '/login';
     }
